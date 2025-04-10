@@ -1,0 +1,24 @@
+[project]
+name = "ethdebug-py"
+version = "0.1.0"
+description = "EthDebug library for Python"
+authors = [
+    {name = "Raoul Schaffranek",email = "raoul.schaffranek@runtimeverification.com"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic (>=2.11.3,<3.0.0)"
+]
+
+[tool.poetry]
+packages = [{include = "ethdebug"}]
+
+
+[tool.poetry.group.dev.dependencies]
+datamodel-code-generator = "^0.28.5"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
