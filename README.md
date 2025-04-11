@@ -25,7 +25,7 @@ git subtree pull --prefix=datamodel-code-generator git@github.com:koxudaxi/datam
 ## Using solc to generate standard json output files
 
 ~~~bash
-pushd tests && solc --standard-json tests/mega_playground/input.json > mega_playground/output.json && popd
-pushd tests && solc --standard-json tests/abstract_and_interface/input.json --pretty-json > tests/abstract_and_interface/output.json && popd
+pushd tests && solc --standard-json mega_playground/input.json > mega_playground/output.json && popd
+pushd tests && solc --standard-json abstract_and_interface/input.json --pretty-json > abstract_and_interface/output.json && popd
 pushd tests && solc --standard-json standard_yul_debug_info_ethdebug_compatible_output/input.json > standard_yul_debug_info_ethdebug_compatible_output/output.json --allow-paths . && popd
 ~~~
