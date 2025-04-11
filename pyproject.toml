@@ -1,5 +1,5 @@
 [project]
-name = "ethdebug-py"
+name = "ethdebug"
 version = "0.1.0"
 description = "EthDebug library for Python"
 authors = [
@@ -7,17 +7,17 @@ authors = [
 ]
 license = {text = "MIT"}
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.9,<4"
 dependencies = [
     "pydantic (>=2.11.3,<3.0.0)"
 ]
 
 [tool.poetry]
-packages = [{include = "ethdebug"}]
+packages = [{include = "ethdebug", from = "src"}]
 
 
 [tool.poetry.group.dev.dependencies]
-datamodel-code-generator = "^0.28.5"
+datamodel-code-generator = {path = "./datamodel-code-generator", develop = true}
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
