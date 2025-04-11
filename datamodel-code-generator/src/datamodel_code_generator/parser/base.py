@@ -517,14 +517,23 @@ class Parser(ABC):
             new_import = Import.from_full_path(additional_import_string)
             self.imports.append(new_import)
 
+    def _cutoff_at_format_schemas(self, path: Path) -> Path:
+        path_str = str(path)
+        marker = 'format/schemas'
+        idx = path_str.find(marker)
+        if idx != -1:
+            return Path(path_str[:idx + len(marker)])
+        return path
+
     def _get_text_from_url(self, url: str) -> str:
         from datamodel_code_generator.http import get_body  # noqa: PLC0415
         from datamodel_code_generator.ethdebug_resolver import ethdebug_get_body  # noqa: PLC0415
 
         if url.startswith("schema:"):
+            base_path = self._cutoff_at_format_schemas(self.base_path)
             return self.remote_text_cache.get_or_put(
                 url,
-                default_factory=lambda url_: ethdebug_get_body(self.base_path, url),
+                default_factory=lambda url_: ethdebug_get_body(base_path, url),
             )
         return self.remote_text_cache.get_or_put(
             url,
