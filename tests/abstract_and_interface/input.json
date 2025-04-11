@@ -1,0 +1,29 @@
+{
+    "language": "Solidity",
+    "sources": {
+        "contract.sol": {
+            "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.29;\n\nabstract contract GreeterBase {\n    function greet() public view virtual returns (string memory);\n}"
+        },
+        "interface.sol": {
+            "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.29;\n\ninterface IGreeter {\n    function greet() external view returns (string memory);\n}"
+        }
+    },
+    "settings": {
+        "viaIR": true,
+        "debug": {
+            "debugInfo": [
+                "ethdebug"
+            ]
+        },
+        "outputSelection": {
+            "*": {
+                "*": [
+                    "evm.bytecode.ethdebug",
+                    "evm.deployedBytecode.ethdebug",
+                    "ir",
+                    "irOptimized"
+                ]
+            }
+        }
+    }
+}

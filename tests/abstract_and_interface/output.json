@@ -1,0 +1,94 @@
+{
+  "contracts": {
+    "contract.sol": {
+      "GreeterBase": {
+        "evm": {
+          "bytecode": {
+            "ethdebug": {
+              "contract": {
+                "definition": {
+                  "source": {
+                    "id": 0
+                  }
+                },
+                "name": "GreeterBase"
+              }
+            }
+          },
+          "deployedBytecode": {
+            "ethdebug": {
+              "contract": {
+                "definition": {
+                  "source": {
+                    "id": 0
+                  }
+                },
+                "name": "GreeterBase"
+              }
+            }
+          }
+        },
+        "ir": "",
+        "irOptimized": ""
+      }
+    },
+    "interface.sol": {
+      "IGreeter": {
+        "evm": {
+          "bytecode": {
+            "ethdebug": {
+              "contract": {
+                "definition": {
+                  "source": {
+                    "id": 1
+                  }
+                },
+                "name": "IGreeter"
+              }
+            }
+          },
+          "deployedBytecode": {
+            "ethdebug": {
+              "contract": {
+                "definition": {
+                  "source": {
+                    "id": 1
+                  }
+                },
+                "name": "IGreeter"
+              }
+            }
+          }
+        },
+        "ir": "",
+        "irOptimized": ""
+      }
+    }
+  },
+  "ethdebug": {
+    "compilation": {
+      "compiler": {
+        "name": "solc",
+        "version": "0.8.29+commit.ab55807c.Linux.g++"
+      },
+      "sources": [
+        {
+          "id": 0,
+          "path": "contract.sol"
+        },
+        {
+          "id": 1,
+          "path": "interface.sol"
+        }
+      ]
+    }
+  },
+  "sources": {
+    "contract.sol": {
+      "id": 0
+    },
+    "interface.sol": {
+      "id": 1
+    }
+  }
+}
