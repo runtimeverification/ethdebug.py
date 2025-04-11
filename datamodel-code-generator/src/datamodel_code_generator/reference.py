@@ -462,7 +462,7 @@ class ModelResolver:  # noqa: PLR0904
                 target_url_path = Path(target_url.path)
                 relative_target_base = get_relative_path(Path(root_id_url.path).parent, target_url_path.parent)
                 target_path = self.current_base_path / relative_target_base / target_url_path.name
-                if target_path.exists():
+                if target_path.exists() and target_path.is_file():
                     return f"{target_path.resolve().relative_to(self._base_path)}#{path_part}"
 
         return ref
@@ -673,7 +673,7 @@ def snake_to_upper_camel(word: str, delimiter: str = "_") -> str:
 
 
 def is_url(ref: str) -> bool:
-    return ref.startswith(("https://", "http://"))
+    return ref.startswith(("https://", "http://", "schema:"))
 
 
 inflect_engine = inflect.engine()
