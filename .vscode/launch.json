@@ -1,0 +1,21 @@
+{
+	"version": "0.2.0",
+    "configurations": [
+        {
+            "name": "EthDebug.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "args": [],
+            "justMyCode": false,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "presentation": {
+                "hidden": false,
+                "group": "ethdebug",
+                "order": 1
+            }
+        }
+    ]
+}
