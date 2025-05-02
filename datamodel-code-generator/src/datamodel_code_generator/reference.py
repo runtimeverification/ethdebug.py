@@ -464,7 +464,18 @@ class ModelResolver:  # noqa: PLR0904
                 target_path = self.current_base_path / relative_target_base / target_url_path.name
                 if target_path.exists() and target_path.is_file():
                     return f"{target_path.resolve().relative_to(self._base_path)}#{path_part}"
-
+            # Special case for EthDebug schema
+            if target_url.scheme == "schema":
+                target_url_path = Path(target_url.path)
+                schema_base_path = Path('/home/raoul/rv/ethdebug.py/format/schemas/')
+                if isinstance(path, str):
+                    schema_file_path = Path(path.removeprefix('schema:ethdebug/format/') + '.schema.yaml')
+                else:
+                    schema_file_path = Path('/'.join(path))
+                target_path = schema_base_path / schema_file_path
+                result = f"{target_path.resolve().relative_to(self._base_path)}#{path_part}"
+                return result
+                
         return ref
 
     def is_after_load(self, ref: str) -> bool:

@@ -10,7 +10,7 @@ The data models used for parsing and validating the EthDebug format are generate
 The files should be regenerated when the JSON schema files change, or when the datamodel-code-generator library is updated.
 
 ~~~bash
-poetry run python ./generate_model.py 
+uv run python ./generate_model.py 
 ~~~
 
 The datamodel-code-generator library we use to generate the validators has some custom changes to make it work with the EthDebug JSON schema files.

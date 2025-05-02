@@ -16,4 +16,7 @@ generate(
     output=OUTPUT_DIR,
     output_model_type=DataModelType.PydanticV2BaseModel,
     target_python_version=PythonVersion.PY_312,
+    allow_extra_fields=False,
+    disable_timestamp=True,
+    reuse_model=True
 )
