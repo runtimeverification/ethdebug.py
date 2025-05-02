@@ -3,8 +3,8 @@
 import json
 import os
 from pathlib import Path
-from ethdebug.format.info import EthdebugFormatInfo
-from ethdebug.format.program import EthdebugFormatProgram
+from ethdebug.format.info_schema import EthdebugFormatInfo
+from ethdebug.format.program_schema import EthdebugFormatProgram
 
 script_dir = Path(__file__).parent
 output_files = [
