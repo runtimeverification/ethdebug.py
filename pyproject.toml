@@ -2,23 +2,29 @@
 name = "ethdebug"
 version = "0.1.0"
 description = "EthDebug library for Python"
-authors = [
-    {name = "Raoul Schaffranek",email = "raoul.schaffranek@runtimeverification.com"}
-]
-license = {text = "MIT"}
-readme = "README.md"
+authors = [{ name = "Raoul Schaffranek", email = "raoul.schaffranek@runtimeverification.com" }]
 requires-python = ">=3.9,<4"
-dependencies = [
-    "pydantic (>=2.11.3,<3.0.0)"
-]
+readme = "README.md"
+license = { text = "MIT" }
+dependencies = ["pydantic (>=2.11.3,<3.0.0)"]
 
-[tool.poetry]
-packages = [{include = "ethdebug", from = "src"}]
+[dependency-groups]
+dev = ["datamodel-code-generator"]
 
+[tool.uv]
 
-[tool.poetry.group.dev.dependencies]
-datamodel-code-generator = {path = "./datamodel-code-generator", develop = true}
+[tool.uv.sources]
+datamodel-code-generator = { path = "./datamodel-code-generator", editable = true }
+
+[tool.hatch.build.targets.sdist]
+include = ["src/ethdebug"]
+
+[tool.hatch.build.targets.wheel]
+include = ["src/ethdebug"]
+
+[tool.hatch.build.targets.wheel.sources]
+"src/ethdebug" = "ethdebug"
 
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"

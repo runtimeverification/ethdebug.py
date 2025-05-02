@@ -25,9 +25,7 @@ classifiers = [
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: Implementation :: CPython",
 ]
-dynamic = [
-  "version",
-]
+version = "0.28.5"
 dependencies = [
   "argcomplete>=2.10.1,<4",
   "black>=19.10b0",
@@ -114,7 +112,6 @@ build.targets.sdist.include = [
   "/src",
   "/tests",
 ]
-version.source = "vcs"
 
 [tool.ruff]
 line-length = 120
@@ -219,6 +216,3 @@ conflicts = [
     { group = "dev" },
   ],
 ]
-
-[tool.poetry]
-version = "0.28.5"
