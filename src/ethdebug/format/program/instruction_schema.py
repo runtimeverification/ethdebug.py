@@ -27,7 +27,7 @@ class EthdebugFormatProgramInstruction(BaseModel):
         title='Instruction byte offset',
     )
     operation: Optional[Operation] = Field(None, title='Machine operation information')
-    context: context_schema.EthdebugFormatProgramContext = Field(
-        ...,
-        description='The context known to exist following the execution of this instruction.\n',
+    context: Optional[context_schema.EthdebugFormatProgramContext] = Field(
+        {},
+        description='The context known to exist following the execution of this instruction.\n\nThis field is **optional**. Omitting it is equivalent to specifying the\nempty context value (`{}`).\n',
     )

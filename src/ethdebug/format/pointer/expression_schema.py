@@ -98,7 +98,7 @@ class Arithmetic(BaseModel):
         description='A tuple of two expressions where the second is to be subtracted from\nthe first.\n\nIf the second operand is larger than the first, the result of this\narithmetic operation is defined to equal zero (`0`).\n\n(i.e., `{ "$difference": [a, b] }` equals `a` minus `b`.)\n',
     )
     field_product: Optional[Operands] = Field(
-        None, alias='$product', description='A list of expressions to be multipled.\n'
+        None, alias='$product', description='A list of expressions to be multiplied.\n'
     )
     field_quotient: Optional[Operands] = Field(
         None,
@@ -143,7 +143,7 @@ class Resize(
         Dict[constr(pattern=r'^\$wordsized$'), EthdebugFormatPointerExpression],
     ] = Field(
         ...,
-        description='A resize operation expression is either an object of the form\n`{ "$sized<N>": <expression> }` or an object of the form\n`{ "$wordsized": <expression> }`, where `<expression>` is an expression\nwhose value is to be resized, and, if applicable, where `<N>` is the\nsmallest decimal representation of an unsigned integer.\n\nThis object\'s value is evaluated as follows, based on the bytes width of\nthe value `<expression>` evaluates to and based on `<N>` (using the\nvalue of `"$wordsize"` for `<N>` in the case of the latter form above):\n- If the width equals `<N>`, this object evalutes to the same value as\n  `<expression>` (equivalent to the identity function or no-op).\n- If the width is less than `<N>`, this object evalutes to the same value\n  as `<expression>` but with additional zero-bytes (`0x00`) prepended on\n  the left (most significant) side, such that the resulting bytes width\n  equals `<N>`.\n- If the width exceeds `<N>`, this object evalutes to the same value\n  as `<expression>` but with a number of bytes removed from the left\n  (most significant) side until the bytes width equals `<N>`.\n\n(These cases match the behavior that Solidity uses for resizing its\n`bytesN`/`uintN` types.)\n',
+        description='A resize operation expression is either an object of the form\n`{ "$sized<N>": <expression> }` or an object of the form\n`{ "$wordsized": <expression> }`, where `<expression>` is an expression\nwhose value is to be resized, and, if applicable, where `<N>` is the\nsmallest decimal representation of an unsigned integer.\n\nThis object\'s value is evaluated as follows, based on the bytes width of\nthe value `<expression>` evaluates to and based on `<N>` (using the\nvalue of `"$wordsize"` for `<N>` in the case of the latter form above):\n- If the width equals `<N>`, this object evaluates to the same value as\n  `<expression>` (equivalent to the identity function or no-op).\n- If the width is less than `<N>`, this object evaluates to the same value\n  as `<expression>` but with additional zero-bytes (`0x00`) prepended on\n  the left (most significant) side, such that the resulting bytes width\n  equals `<N>`.\n- If the width exceeds `<N>`, this object evaluates to the same value\n  as `<expression>` but with a number of bytes removed from the left\n  (most significant) side until the bytes width equals `<N>`.\n\n(These cases match the behavior that Solidity uses for resizing its\n`bytesN`/`uintN` types.)\n',
         examples=[{'$sized2': '0x00'}, {'$sized2': '0xffffff'}, {'$wordsized': '0x00'}],
         title='Resize data',
     )

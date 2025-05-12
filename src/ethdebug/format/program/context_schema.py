@@ -3,44 +3,8 @@
 
 from __future__ import annotations
 
-from typing import Union
-
-from pydantic import Field, RootModel
-
-from .context import code_schema, remark_schema, variables_schema
+from pydantic import BaseModel
 
 
-class EthdebugFormatProgramContext(
-    RootModel[
-        Union[
-            code_schema.EthdebugFormatProgramContextCode,
-            variables_schema.EthdebugFormatProgramContextVariables,
-            remark_schema.EthdebugFormatProgramContextRemark,
-        ]
-    ]
-):
-    root: Union[
-        code_schema.EthdebugFormatProgramContextCode,
-        variables_schema.EthdebugFormatProgramContextVariables,
-        remark_schema.EthdebugFormatProgramContextRemark,
-    ] = Field(
-        ...,
-        description='A schema for representing the information known at compile-time about the\nhigh-level language concerns at a particular point in code execution.\n',
-        examples=[
-            {
-                'variables': [
-                    {
-                        'identifier': 'x',
-                        'declaration': {
-                            'source': {'id': 5},
-                            'range': {'offset': 10, 'length': 56},
-                        },
-                        'type': {'kind': 'string'},
-                        'pointer': {'location': 'storage', 'slot': 0},
-                    }
-                ],
-                'code': {'source': {'id': 5}, 'range': {'offset': 68, 'length': 16}},
-            }
-        ],
-        title='ethdebug/format/program/context',
-    )
+class EthdebugFormatProgramContext(BaseModel):
+    pass

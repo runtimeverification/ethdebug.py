@@ -35,8 +35,8 @@ class EthdebugFormatProgram(BaseModel):
         title='Bytecode execution environment',
     )
     context: Optional[context_schema.EthdebugFormatProgramContext] = Field(
-        None,
-        description='The context known to exist prior to the execution of the first\ninstruction in the bytecode.\n',
+        {},
+        description='The context known to exist prior to the execution of the first\ninstruction in the bytecode.\n\nThis field is **optional**. Omitting it is equivalent to specifying the\nempty context value (`{}`).\n',
     )
     instructions: List[instruction_schema.EthdebugFormatProgramInstruction] = Field(
         ..., description='The full array of instructions for the bytecode.\n'
