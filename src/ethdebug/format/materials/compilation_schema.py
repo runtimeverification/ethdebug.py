@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -16,6 +16,10 @@ class Compiler(BaseModel):
         ...,
         description='Compiler version.\n\nThis value **should** be specified using the most detailed version\nrepresentation available, i.e., including source control hash and\ncompiler build information whenever possible.\n',
     )
+
+
+class Settings(BaseModel):
+    pass
 
 
 class EthdebugFormatMaterialsCompilation(BaseModel):
@@ -33,7 +37,7 @@ class EthdebugFormatMaterialsCompilation(BaseModel):
         ],
         title='Compiler name and version',
     )
-    settings: Optional[Dict[str, Any]] = Field(
+    settings: Optional[Settings] = Field(
         None,
         description='Compiler settings in a format native to the compiler.\n\nFor compilers whose settings includes full source representations, this\nfield **should** be specified in such a way that avoids large data\nredundancies (e.g. if compiler settings contain full source\nrepresentations, then this field would significantly duplicate the\ninformation represented by the `sources` field in this object).\n\nIn situations where settings information duplicates information\nrepresented elsewhere in **ethdebug/format**, compilers **may** adopt\nany reasonable strategy, e.g.:\n  - omit duplications partially (leaving the rest of the settings\n    intact)\n  - omit this field entirely\n  - specify this field as a hash of the full settings\n    representation (with the expectation that users of this format will\n    have access to the full representation by some other means)\n',
     )
