@@ -1,8 +1,9 @@
 
 
 from functools import singledispatch
+import typing
 from ethdebug import read
-from ethdebug.cursor import Regions
+from ethdebug.cursor import Region, Regions
 from ethdebug.data import Data
 from ethdebug.format.pointer.expression_schema import Arithmetic, Constant, EthdebugFormatPointerExpression, Keccak256, Literal, Lookup, Operands, Read, Resize, Variable
 from ethdebug.machine import MachineState
@@ -227,11 +228,11 @@ async def _(expression: Lookup, options: EvaluateOptions) -> Data:
     
     property = identifier.root[1:]
     
-    region = options.regions.get(identifier)
+    region = options.regions.lookup(identifier)
     if region is None:
         raise ValueError(f"Regiond not found: {identifier}")
     
-    data = region.get(property)
+    data = region_lookup(property, region)
 
     if data is None:
         raise ValueError(f'Region named {identifier} does not have ${property} needed by lookup')
@@ -243,8 +244,22 @@ async def _(expression: Read, options: EvaluateOptions) -> Data:
     Evaluate a read expression.
     """
     identifier = expression.field_read
-    region = options.regions.get(identifier)
+    region = options.regions.lookup(identifier)
     if region is None:
         raise ValueError(f"Regiond not found: {identifier}")
     data = await read(region, options.state)
     return data
+
+
+def region_lookup(
+    property: typing.Literal['.slot', '.offset', '.length'],
+    region: Region
+) -> Data:
+    if property == '.slot':
+        return region.slot
+    elif property == '.offset':
+        return region.offset
+    elif property == '.length':
+        return region.length
+    else:
+        raise ValueError(f"Invalid property: {property}")

@@ -15,7 +15,7 @@ async def read(region: Region, state: MachineState) -> Data:
     elif location == "memory":
         return await state.memory.read(offset, length)
     elif location == "storage":
-        return await state.storage.read(offset, length)
+        return await state.storage.read(slot, offset, length)
     elif location == "calldata":
         return await state.calldata.read(offset, length)
     elif location == "returndata":
@@ -23,4 +23,4 @@ async def read(region: Region, state: MachineState) -> Data:
     elif location == "transient":
         return await state.transient.read(slot, offset, length)
     elif location == "code":
-        return await state.code.read(slot, offset, length)
+        return await state.code.read(offset, length)

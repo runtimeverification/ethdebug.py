@@ -68,7 +68,7 @@ class Read(BaseModel):
 
 class EthdebugFormatPointerExpression(
     RootModel[
-        Union[Literal, Variable, Constant, Arithmetic, Lookup, Read, Keccak256, Resize]
+        Union[Literal, Variable, Constant, 'Arithmetic', Lookup, Read, 'Keccak256', 'Resize']
     ]
 ):
     root: Union[
