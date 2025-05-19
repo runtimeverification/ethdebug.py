@@ -1,16 +1,18 @@
 from __future__ import annotations
-from abc import ABC
-from typing import AsyncIterable, Protocol, runtime_checkable, Optional
+from typing import AsyncIterable, Protocol
 
 from ethdebug.data import Data
 
-@runtime_checkable
 class Machine(Protocol):
-    async def trace(self) -> AsyncIterable["Machine.State"]:
+    async def trace(self) -> MachineTrace:
         ...
 
+class MachineTrace(Protocol):
 
-class MachineState(ABC):
+    def __aiter__(self) -> AsyncIterable[MachineState]:
+        ...
+
+class MachineState(Protocol):
     async def trace_index(self) -> int:
         ...
 
@@ -20,50 +22,68 @@ class MachineState(ABC):
     async def opcode(self) -> str:
         ...
 
-    def stack(self) -> MachineStateStack:
+    def stack(self) -> MachineStack:
         ...
 
-    def memory(self) -> MachineStateBytes:
+    def memory(self) -> MachineMemory:
         ...
 
-    def storage(self) -> MachineStateWords:
+    def storage(self) -> MachineStorage:
         ...
 
-    def calldata(self) -> MachineStateBytes:
+    def calldata(self) -> MachineCalldata:
         ...
 
-    def returndata(self) -> MachineStateBytes:
+    def returndata(self) -> MachineReturndata:
         ...
 
-    def transient(self) -> MachineStateWords:
+    def transient(self) -> MachineTransientStorage:
         ...
 
-    def code(self) -> MachineStateBytes:
+    def code(self) -> MachineCode:
         ...
+    
 
-
-class MachineStateSlice:
-    def __init__(self, offset: int, length: int):
-        self.offset = offset
-        self.length = length
-
-
-class MachineStateStack:
+class MachineStack(Protocol):
     async def length(self) -> int:
         ...
 
-    async def peek(self, depth: int, slice: Optional[MachineStateSlice] = None) -> Data:
+    async def read(self, slot: int, offset: int, length: int = 32) -> Data:
         ...
 
 
-class MachineStateBytes:
+class MachineMemory(Protocol):
     async def length(self) -> int:
         ...
 
-    async def read(self, slice: MachineStateSlice) -> Data:
+    async def read(self, ofset: int, length: int = 32) -> Data:
         ...
 
+class MachineReturndata(Protocol):
+    async def length(self) -> int:
+        ...
 
-class MachineStateWords:
-    async def read(self, slot: Data, slice: Optional[MachineStateSlice] = None) -> Data:
+    async def read(self, ofset: int, length: int = 32) -> Data:
+        ...
+
+class MachineCalldata(Protocol):
+    async def length(self) -> int:
+        ...
+
+    async def read(self, ofset: int, length: int = 32) -> Data:
+        ...
+
+class MachineStorage(Protocol):
+    async def read(self, slot: int, offset: int, length: int = 32) -> Data:
+        ...
+
+class MachineTransientStorage(Protocol):
+    async def read(self, slot: int, offset: int, length: int = 32) -> Data:
+        ...
+
+class MachineCode(Protocol):
+    async def length(self) -> int:
+        ...
+
+    async def read(self, ofset: int, length: int = 32) -> Data:
         ...
