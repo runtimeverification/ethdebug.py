@@ -26,10 +26,11 @@ async def _(expression: Literal, options: EvaluateOptions) -> Data:
     """
     Evaluate a literal expression.
     """
-    if isinstance(expression.root, int):
-        return Data.from_int(expression.root)
-    elif isinstance(expression.root, str):
-        return Data.from_str(expression.root)
+    unwraped : int | str = expression.root.root.root
+    if isinstance(unwraped, int):
+        return Data.from_int(unwraped)
+    elif isinstance(unwraped, str):
+        return Data.from_hex(unwraped)
     else:
         raise ValueError(f"Unsupported literal type: {type(expression.root)}")
     
@@ -47,9 +48,9 @@ async def _(expression: Variable, options: EvaluateOptions) -> Data:
     """
     Evaluate a variable expression.
     """
-    data = options.variables.get(expression.root)
+    data = options.variables.get(expression.root.root)
     if data is None:
-        raise ValueError(f"Unknown variable: {expression.root}")
+        raise ValueError(f"Unknown variable: {expression.root.root}")
     return data
 
 @evaluate.register
@@ -58,15 +59,15 @@ async def _(expression: Arithmetic, options: EvaluateOptions) -> Data:
    Evaluate an arithmetic expression.
    """
    if expression.field_sum:
-       return await evaluate_arithmetic_sum(expression, options)
+       return await evaluate_arithmetic_sum(expression.field_sum, options)
    elif expression.field_difference:
-       return await evaluate_arithmetic_difference(expression, options)
+       return await evaluate_arithmetic_difference(expression.field_difference, options)
    elif expression.field_product:
-       return await evaluate_arithmetic_product(expression, options)
+       return await evaluate_arithmetic_product(expression.field_product, options)
    elif expression.field_quotient:
-       return await evaluate_arithmetic_quotient(expression, options)
+       return await evaluate_arithmetic_quotient(expression.field_quotient, options)
    elif expression.field_remainder:
-       return await evaluate_arithmetic_remainder(expression, options)
+       return await evaluate_arithmetic_remainder(expression.field_remainder, options)
    else:
        raise ValueError(f"Unsupported arithmetic operation: {expression}")
 
@@ -82,10 +83,10 @@ async def evaluate_arithmetic_sum(
     """
     result = 0
     maxLength = 0
-    for expression in operands:
-        sub = await evaluate(expression, options)
-        result += sub.asUint()
-        maxLength = max(maxLength, sub.length)
+    for expression in operands.root:
+        sub = await evaluate(expression.root, options)
+        result += sub.as_uint()
+        maxLength = max(maxLength, len(sub))
     return Data.from_int(result).pad_until_at_least(maxLength)
 
 async def evaluate_arithmetic_product(
@@ -100,10 +101,10 @@ async def evaluate_arithmetic_product(
     """
     result = 1
     maxLength = 0
-    for expression in operands:
-        sub = await evaluate(expression, options)
-        result *= sub.asUint()
-        maxLength = max(maxLength, sub.length)
+    for expression in operands.root:
+        sub = await evaluate(expression.root, options)
+        result *= sub.as_uint()
+        maxLength = max(maxLength, len(sub))
     return Data.from_int(result).pad_until_at_least(maxLength)
 
 async def evaluate_arithmetic_difference(
@@ -118,12 +119,12 @@ async def evaluate_arithmetic_difference(
     This method operates on unsigned integers.
     The result is bounded to 0 if the second operand is larger than the first.
     """
-    if len(operands) != 2:
+    if len(operands.root) != 2:
         raise ValueError("Difference operation requires exactly 2 operands")
-    a = await evaluate(operands[0], options)
-    b = await evaluate(operands[1], options)
-    result = max(0, a.asUint() - b.asUint())
-    return Data.from_int(result).pad_until_at_least(max(a.length, b.length))
+    a = await evaluate(operands.root[0].root, options)
+    b = await evaluate(operands.root[1].root, options)
+    result = max(0, a.as_uint() - b.as_uint())
+    return Data.from_int(result).pad_until_at_least(max(len(a), len(b)))
 
 async def evaluate_arithmetic_quotient(
     operands: Operands,
@@ -137,14 +138,14 @@ async def evaluate_arithmetic_quotient(
     Raises an exception if the second operand is 0.
     This method operates on unsigned integers.
     """
-    if len(operands) != 2:
+    if len(operands.root) != 2:
         raise ValueError("Quotient operation requires exactly 2 operands")
-    a = await evaluate(operands[0], options)
-    b = await evaluate(operands[1], options)
-    if b.asUint() == 0:
+    a = await evaluate(operands.root[0].root, options)
+    b = await evaluate(operands.root[1].root, options)
+    if b.as_uint() == 0:
         raise ValueError("Division by zero")
-    result = a.asUint() // b.asUint()
-    return Data.from_int(result).pad_until_at_least(max(a.length, b.length))
+    result = a.as_uint() // b.as_uint()
+    return Data.from_int(result).pad_until_at_least(max(len(a), len(b)))
 
 async def evaluate_arithmetic_remainder(
     operands: Operands,
@@ -158,24 +159,24 @@ async def evaluate_arithmetic_remainder(
     Raises an exception if the second operand is 0.
     This method operates on unsigned integers.
     """
-    if len(operands) != 2:
+    if len(operands.root) != 2:
         raise ValueError("Remainder operation requires exactly 2 operands")
-    a = await evaluate(operands[0], options)
-    b = await evaluate(operands[1], options)
-    if b.asUint() == 0:
+    a = await evaluate(operands.root[0].root, options)
+    b = await evaluate(operands.root[1].root, options)
+    if b.as_uint() == 0:
         raise ValueError("Division by zero")
-    result = a.asUint() % b.asUint()
-    return Data.from_int(result).pad_until_at_least(max(a.length, b.length))
+    result = a.as_uint() % b.as_uint()
+    return Data.from_int(result).pad_until_at_least(max(len(a), len(b)))
 
 @evaluate.register
 async def _(expression: Resize, options: EvaluateOptions) -> Data:
     """
     Evaluate a resize expression.
     """
-    # Iterate over all fields until we find $wordsized or $resize<N>
+    # Iterate over all fields until we find $wordsized or $sized<N>
     for field in expression.root.keys():
-        if field.startswith('$resize'):
-            # $resize<N>
+        if field.startswith('$sized'):
+            # $sized<N>
             resize_name = field
             break
         elif field == '$wordsized':
@@ -187,15 +188,15 @@ async def _(expression: Resize, options: EvaluateOptions) -> Data:
     if resize_name == '$wordsized':
         # $wordsized
         new_size = 32
-    elif resize_name.startswith('$resize'):
-        # $resize<N>
-        new_size = int(resize_name[len('$resize'):])
+    elif resize_name.startswith('$sized'):
+        # $sized<N>
+        new_size = int(resize_name[len('$sized'):])
         if new_size <= 0:
             raise ValueError(f"Invalid resize size: {new_size}")
         
     # Evaluate the expression
     sub = expression.root[resize_name]
-    result = await evaluate(sub, options)
+    result = await evaluate(sub.root, options)
     # Resize the result
     return result.resize_to(new_size)
 
@@ -207,7 +208,7 @@ async def _(expression: Keccak256, options: EvaluateOptions) -> Data:
     # Concatenate all the operands
     subs = []
     for operand in expression.root:
-        subs.append(await evaluate(operand, options))
+        subs.append(await evaluate(operand.root, options))
     preimage = Data.zero().concat(subs)
     hash = Data.from_bytes(keccak(preimage))
     return hash
@@ -217,25 +218,25 @@ async def _(expression: Lookup, options: EvaluateOptions) -> Data:
     """
     Evaluate a lookup expression.
     """
-    identifier : Literal['.slot', '.offset', '.length'] | None = None
-    identifiers = ['.slot', '.offset', '.length']
+    property : Literal['.slot', '.offset', '.length'] | None = None
+    property_names = ['.slot', '.offset', '.length']
     for field in expression.root.keys():
-        if field in identifiers:
-            identifier = field
+        if field in property_names:
+            property = field
             break
-    if identifier is None:
+    if property is None:
         raise ValueError(f"Invalid lookup operation: {expression.root}")
     
-    property = identifier.root[1:]
+    reference = expression.root.get(property)
     
-    region = options.regions.lookup(identifier)
+    region = options.regions.lookup(reference.root)
     if region is None:
-        raise ValueError(f"Regiond not found: {identifier}")
+        raise ValueError(f"Regiond not found: {reference.root}")
     
     data = region_lookup(property, region)
 
     if data is None:
-        raise ValueError(f'Region named {identifier} does not have ${property} needed by lookup')
+        raise ValueError(f'Region named {reference.root} does not have ${property} needed by lookup')
     return data
 
 @evaluate.register

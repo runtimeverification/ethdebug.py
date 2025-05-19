@@ -43,8 +43,9 @@ class Data(bytes):
             return self
 
         if len(self) < length:
-            resized = bytes(length)
+            resized = bytearray(length)
             resized[length - len(self):] = self
+            resized = bytes(resized)
         else:
             resized = self[-length:]
 

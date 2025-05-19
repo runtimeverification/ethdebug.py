@@ -1,13 +1,13 @@
 import pytest
 from unittest.mock import AsyncMock
 from ethdebug.cursor import Region
-from ethdebug.evaluate import EvaluateOptions
 from ethdebug.machine import MachineState
 from ethdebug.data import Data
 from ethdebug.read import read
+from tests.mock_machine import MockCalldata, MockCode, MockMemory, MockReturndata, MockStack, MockState, MockStorage, MockTransient
 
 @pytest.fixture
-def options() -> EvaluateOptions:
+def state() -> MachineState:
     state : MachineState = MockState(
         stack = MockStack(
             length = 50,
@@ -32,85 +32,77 @@ def options() -> EvaluateOptions:
             read = AsyncMock(return_value=Data.from_bytes(bytearray([0x11, 0x22, 0x33, 0x44]))),
         ),
     )
-    return MockOptions(
-        state=state,
-        regions=tuple(),
-    )
+    return state
 
 @pytest.mark.asyncio
-async def test_read_stack(options):
+async def test_read_stack(state):
     region = MockRegion(location="stack", slot=Data.from_int(42), offset=Data.from_int(1), length=Data.from_int(2))
-    result = await read(region, options.state)
-    options.state.stack.read.assert_called_with(42, 1, 2)
+    result = await read(region, state)
+    state.stack.read.assert_called_with(42, 1, 2)
     assert result == Data.from_bytes(bytearray([0x11, 0x22, 0x33, 0x44]))
 
 @pytest.mark.asyncio
-async def test_read_memory(options):
+async def test_read_memory(state):
     region = MockRegion(location="memory", offset=Data.from_int(0), length=Data.from_int(4))
-    result = await read(region, options.state)
-    options.state.memory.read.assert_called_with(0, 4)
+    result = await read(region, state)
+    state.memory.read.assert_called_with(0, 4)
     assert result == Data.from_bytes(bytearray([0x55, 0x66, 0x77, 0x88]))
 
 @pytest.mark.asyncio
-async def test_read_storage(options):
+async def test_read_storage(state):
     region = MockRegion(location="storage", slot=Data.from_int(0), offset=Data.from_int(2), length=Data.from_int(2))
-    result = await read(region, options.state)
-    options.state.storage.read.assert_called_with(0, 2, 2)
+    result = await read(region, state)
+    state.storage.read.assert_called_with(0, 2, 2)
     assert result == Data.from_bytes(bytearray([0xaa, 0xbb, 0xcc, 0xdd]))
 
 @pytest.mark.asyncio
-async def test_read_calldata(options):
+async def test_read_calldata(state):
     region = MockRegion(location="calldata", offset=Data.from_int(0), length=Data.from_int(4))
-    result = await read(region, options.state)
-    options.state.calldata.read.assert_called_with(0, 4)
+    result = await read(region, state)
+    state.calldata.read.assert_called_with(0, 4)
     assert result == Data.from_bytes(bytearray([0x11, 0x22, 0x33, 0x44]))
 
 @pytest.mark.asyncio
-async def test_read_returndata(options):
+async def test_read_returndata(state):
     region = MockRegion(location="returndata", offset=Data.from_int(0), length=Data.from_int(4))
-    result = await read(region, options.state)
-    options.state.returndata.read.assert_called_with(0, 4)
+    result = await read(region, state)
+    state.returndata.read.assert_called_with(0, 4)
     assert result == Data.from_bytes(bytearray([0x55, 0x66, 0x77, 0x88]))
 
 @pytest.mark.asyncio
-async def test_read_transient(options):
+async def test_read_transient(state):
     region = MockRegion(location="transient", slot=Data.from_int(42), offset=Data.from_int(1), length=Data.from_int(2))
-    result = await read(region, options.state)
-    options.state.transient.read.assert_called_with(42, 1, 2)
+    result = await read(region, state)
+    state.transient.read.assert_called_with(42, 1, 2)
     assert result == Data.from_bytes(bytearray([0xaa, 0xbb, 0xcc, 0xdd]))
 
 @pytest.mark.asyncio
-async def test_read_code(options):
+async def test_read_code(state):
     region = MockRegion(location="code", offset=Data.from_int(0), length=Data.from_int(4))
-    result = await read(region, options.state)
-    options.state.code.read.assert_called_with(0, 4)
+    result = await read(region, state)
+    state.code.read.assert_called_with(0, 4)
     assert result == Data.from_bytes(bytearray([0x11, 0x22, 0x33, 0x44]))
 
 @pytest.mark.asyncio
-async def test_default_stack_values(options):
+async def test_default_stack_values(state):
     region = MockRegion(location="stack", slot=Data.from_int(42))
-    result = await read(region, options.state)
-    options.state.stack.read.assert_called_with(42, 0, 32)
+    result = await read(region, state)
+    state.stack.read.assert_called_with(42, 0, 32)
     assert result == Data.from_bytes(bytearray([0x11, 0x22, 0x33, 0x44]))
 
 @pytest.mark.asyncio
-async def test_default_storage_values(options):
+async def test_default_storage_values(state):
     region = MockRegion(location="storage", slot=Data.from_hex("0x1f"))
-    result = await read(region, options.state)
-    options.state.storage.read.assert_called_with(0x1f, 0, 32)
+    result = await read(region, state)
+    state.storage.read.assert_called_with(0x1f, 0, 32)
     assert result == Data.from_bytes(bytearray([0xaa, 0xbb, 0xcc, 0xdd]))
 
 @pytest.mark.asyncio
-async def test_default_transient_values(options):
+async def test_default_transient_values(state):
     region = MockRegion(location="transient", slot=Data.from_int(42))
-    result = await read(region, options.state)
-    options.state.transient.read.assert_called_with(42, 0, 32)
+    result = await read(region, state)
+    state.transient.read.assert_called_with(42, 0, 32)
     assert result == Data.from_bytes(bytearray([0xaa, 0xbb, 0xcc, 0xdd]))
-
-class MockOptions:
-    def __init__(self, state, regions):
-        self.state = state
-        self.regions = regions
 
 class MockRegion(Region):
     def __init__(self, location, slot=None, offset=None, length=None):
@@ -118,43 +110,3 @@ class MockRegion(Region):
         self.slot = slot
         self.offset = offset
         self.length = length
-
-class MockState(MachineState):
-    def __init__(self, stack, memory, storage, calldata, returndata, transient, code):
-        self.stack = stack
-        self.memory = memory
-        self.storage = storage
-        self.calldata = calldata
-        self.returndata = returndata
-        self.transient = transient
-        self.code = code
-
-class MockStack:
-    def __init__(self, length, read):
-        self.length = length
-        self.read = read
-
-class MockMemory:
-    def __init__(self, read):
-        self.read = read
-
-class MockStorage:
-    def __init__(self, read):
-        self.read = read
-
-class MockCalldata:
-    def __init__(self, read):
-        self.read = read
-
-class MockReturndata:
-    def __init__(self, read):
-        self.read = read
-
-class MockTransient:
-    def __init__(self, read):
-        self.read = read
-
-class MockCode:
-    def __init__(self, read):
-        self.read = read
-    
