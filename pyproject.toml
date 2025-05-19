@@ -12,7 +12,10 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["datamodel-code-generator"]
+dev = [
+    "datamodel-code-generator",
+    "pytest>=8.3.5",
+]
 
 [tool.uv]
 
