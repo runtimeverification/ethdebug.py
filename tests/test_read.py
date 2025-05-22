@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import AsyncMock
-from ethdebug.cursor import Region
+from ethdebug.dereference.cursor import Region
 from ethdebug.machine import MachineState
 from ethdebug.data import Data
 from ethdebug.read import read
@@ -39,77 +39,70 @@ def state() -> MachineState:
 
 @pytest.mark.asyncio
 async def test_read_stack(state):
-    region = MockRegion(location="stack", slot=Data.from_int(42), offset=Data.from_int(1), length=Data.from_int(2))
+    region = Region(name="stack", location="stack", slot=Data.from_int(42), offset=Data.from_int(1), length=Data.from_int(2))
     result = await read(region, state)
     state.stack.read.assert_called_with(42, 1, 2)
     assert result == Data.from_bytes(bytearray([0x11, 0x22, 0x33, 0x44]))
 
 @pytest.mark.asyncio
 async def test_read_memory(state):
-    region = MockRegion(location="memory", offset=Data.from_int(0), length=Data.from_int(4))
+    region = Region(name="memory", location="memory", slot=None, offset=Data.from_int(0), length=Data.from_int(4))
     result = await read(region, state)
     state.memory.read.assert_called_with(0, 4)
     assert result == Data.from_bytes(bytearray([0x55, 0x66, 0x77, 0x88]))
 
 @pytest.mark.asyncio
 async def test_read_storage(state):
-    region = MockRegion(location="storage", slot=Data.from_int(0), offset=Data.from_int(2), length=Data.from_int(2))
+    region = Region(name="storage", location="storage", slot=Data.from_int(0), offset=Data.from_int(2), length=Data.from_int(2))
     result = await read(region, state)
     state.storage.read.assert_called_with(0, 2, 2)
     assert result == Data.from_bytes(bytearray([0xaa, 0xbb, 0xcc, 0xdd]))
 
 @pytest.mark.asyncio
 async def test_read_calldata(state):
-    region = MockRegion(location="calldata", offset=Data.from_int(0), length=Data.from_int(4))
+    region = Region(name="calldata", location="calldata", slot=None, offset=Data.from_int(0), length=Data.from_int(4))
     result = await read(region, state)
     state.calldata.read.assert_called_with(0, 4)
     assert result == Data.from_bytes(bytearray([0x11, 0x22, 0x33, 0x44]))
 
 @pytest.mark.asyncio
 async def test_read_returndata(state):
-    region = MockRegion(location="returndata", offset=Data.from_int(0), length=Data.from_int(4))
+    region = Region(name="returndata", location="returndata", slot=None, offset=Data.from_int(0), length=Data.from_int(4))
     result = await read(region, state)
     state.returndata.read.assert_called_with(0, 4)
     assert result == Data.from_bytes(bytearray([0x55, 0x66, 0x77, 0x88]))
 
 @pytest.mark.asyncio
 async def test_read_transient(state):
-    region = MockRegion(location="transient", slot=Data.from_int(42), offset=Data.from_int(1), length=Data.from_int(2))
+    region = Region(name="transient", location="transient", slot=Data.from_int(42), offset=Data.from_int(1), length=Data.from_int(2))
     result = await read(region, state)
     state.transient.read.assert_called_with(42, 1, 2)
     assert result == Data.from_bytes(bytearray([0xaa, 0xbb, 0xcc, 0xdd]))
 
 @pytest.mark.asyncio
 async def test_read_code(state):
-    region = MockRegion(location="code", offset=Data.from_int(0), length=Data.from_int(4))
+    region = Region(name="code", location="code", slot=None, offset=Data.from_int(0), length=Data.from_int(4))
     result = await read(region, state)
     state.code.read.assert_called_with(0, 4)
     assert result == Data.from_bytes(bytearray([0x11, 0x22, 0x33, 0x44]))
 
 @pytest.mark.asyncio
 async def test_default_stack_values(state):
-    region = MockRegion(location="stack", slot=Data.from_int(42))
+    region = Region(name="stack", location="stack", slot=Data.from_int(42), offset=Data.from_int(0), length=Data.from_int(32))
     result = await read(region, state)
     state.stack.read.assert_called_with(42, 0, 32)
     assert result == Data.from_bytes(bytearray([0x11, 0x22, 0x33, 0x44]))
 
 @pytest.mark.asyncio
 async def test_default_storage_values(state):
-    region = MockRegion(location="storage", slot=Data.from_hex("0x1f"))
+    region = Region(name="storage", location="storage", slot=Data.from_hex("0x1f"), offset=Data.from_int(0), length=Data.from_int(32))
     result = await read(region, state)
     state.storage.read.assert_called_with(0x1f, 0, 32)
     assert result == Data.from_bytes(bytearray([0xaa, 0xbb, 0xcc, 0xdd]))
 
 @pytest.mark.asyncio
 async def test_default_transient_values(state):
-    region = MockRegion(location="transient", slot=Data.from_int(42))
+    region = Region(name="transient", location="transient", slot=Data.from_int(42), offset=Data.from_int(0), length=Data.from_int(32))
     result = await read(region, state)
     state.transient.read.assert_called_with(42, 0, 32)
     assert result == Data.from_bytes(bytearray([0xaa, 0xbb, 0xcc, 0xdd]))
-
-class MockRegion(Region):
-    def __init__(self, location, slot=None, offset=None, length=None):
-        self.location = location
-        self.slot = slot
-        self.offset = offset
-        self.length = length
