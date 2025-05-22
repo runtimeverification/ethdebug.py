@@ -1,19 +1,20 @@
 from unittest.mock import AsyncMock
 from ethdebug.data import Data
 from ethdebug.machine import MachineState
+from dataclasses import dataclass
 
+@dataclass
 class MockState(MachineState):
-    def __init__(self, stack, memory, storage, calldata, returndata, transient, code, trace_index, program_counter, opcode):
-        self.stack = stack
-        self.memory = memory
-        self.storage = storage
-        self.calldata = calldata
-        self.returndata = returndata
-        self.transient = transient
-        self.code = code
-        self.trace_index = trace_index
-        self.program_counter = program_counter
-        self.opcode = opcode
+    stack: 'MockStack'
+    memory: 'MockMemory'
+    storage: 'MockStorage'
+    calldata: 'MockCalldata'
+    returndata: 'MockReturndata'
+    transient: 'MockTransient'
+    code: 'MockCode'
+    trace_index: int
+    program_counter: int
+    opcode: str
 
 class MockStack:
     def __init__(self, length, read = AsyncMock(return_value=Data.from_bytes(bytearray([0x11, 0x22, 0x33, 0x44])))):

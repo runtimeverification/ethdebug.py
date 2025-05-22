@@ -3,8 +3,41 @@
 
 from __future__ import annotations
 
-from pydantic import BaseModel
+from typing import Union
+
+from pydantic import Field, RootModel
+
+from .collection import (
+    conditional_schema,
+    group_schema,
+    list_schema,
+    reference_schema,
+    scope_schema,
+)
 
 
-class EthdebugFormatPointerCollection(BaseModel):
-    pass
+class EthdebugFormatPointerCollection(
+    RootModel[
+        Union[
+            group_schema.EthdebugFormatPointerCollectionGroup,
+            list_schema.EthdebugFormatPointerCollectionList,
+            conditional_schema.EthdebugFormatPointerCollectionConditional,
+            scope_schema.EthdebugFormatPointerCollectionScope,
+            reference_schema.EthdebugFormatPointerCollectionReference,
+        ]
+    ]
+):
+    root: Union[
+        group_schema.EthdebugFormatPointerCollectionGroup,
+        list_schema.EthdebugFormatPointerCollectionList,
+        conditional_schema.EthdebugFormatPointerCollectionConditional,
+        scope_schema.EthdebugFormatPointerCollectionScope,
+        reference_schema.EthdebugFormatPointerCollectionReference,
+    ] = Field(
+        ...,
+        description='A representation of a collection of pointers to data in the EVM\n',
+        title='ethdebug/format/pointer/collection',
+    )
+
+
+EthdebugFormatPointerCollection.model_rebuild()

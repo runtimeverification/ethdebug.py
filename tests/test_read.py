@@ -9,6 +9,9 @@ from tests.mock_machine import MockCalldata, MockCode, MockMemory, MockReturndat
 @pytest.fixture
 def state() -> MachineState:
     state : MachineState = MockState(
+        trace_index=42,
+        opcode="PUSH1",
+        program_counter=10,
         stack = MockStack(
             length = 50,
             read = AsyncMock(return_value=Data.from_bytes(bytearray([0x11, 0x22, 0x33, 0x44]))),

@@ -34,9 +34,9 @@ class Data(bytes):
         if len(self) >= length:
             return self
 
-        padded = bytes(length)
+        padded = bytearray(length)
         padded[length - len(self):] = self
-        return Data(padded)
+        return Data(bytes(padded))
 
     def resize_to(self, length: int) -> Data:
         if len(self) == length:

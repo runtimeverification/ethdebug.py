@@ -3,21 +3,53 @@
 
 from __future__ import annotations
 
-from enum import Enum
-from typing import Optional
+from typing import Union
 
-from pydantic import BaseModel
+from pydantic import Field, RootModel
+
+from .region import (
+    calldata_schema,
+    code_schema,
+    memory_schema,
+    returndata_schema,
+    stack_schema,
+    storage_schema,
+    transient_schema,
+)
 
 
-class Location(Enum):
-    stack = 'stack'
-    memory = 'memory'
-    storage = 'storage'
-    calldata = 'calldata'
-    returndata = 'returndata'
-    transient = 'transient'
-    code = 'code'
+class EthdebugFormatPointerRegion(
+    RootModel[
+        Union[
+            stack_schema.EthdebugFormatPointerRegionStack,
+            memory_schema.EthdebugFormatPointerRegionMemory,
+            storage_schema.EthdebugFormatPointerRegionStorage,
+            calldata_schema.EthdebugFormatPointerRegionCalldata,
+            returndata_schema.EthdebugFormatPointerRegionReturndata,
+            transient_schema.EthdebugFormatPointerRegionTransient,
+            code_schema.EthdebugFormatPointerRegionCode,
+        ]
+    ]
+):
+    root: Union[
+        stack_schema.EthdebugFormatPointerRegionStack,
+        memory_schema.EthdebugFormatPointerRegionMemory,
+        storage_schema.EthdebugFormatPointerRegionStorage,
+        calldata_schema.EthdebugFormatPointerRegionCalldata,
+        returndata_schema.EthdebugFormatPointerRegionReturndata,
+        transient_schema.EthdebugFormatPointerRegionTransient,
+        code_schema.EthdebugFormatPointerRegionCode,
+    ] = Field(
+        ...,
+        description='A representation of a region of data in the EVM\n',
+        examples=[
+            {
+                'location': 'storage',
+                'slot': '0x0000000000000000000000000000000000000000000000000000000000000000',
+            }
+        ],
+        title='ethdebug/format/pointer/region',
+    )
 
 
-class EthdebugFormatPointerRegion(BaseModel):
-    location: Optional[Location] = None
+EthdebugFormatPointerRegion.model_rebuild()

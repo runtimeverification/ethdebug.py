@@ -2,8 +2,11 @@ import pytest
 from unittest.mock import AsyncMock
 from ethdebug.evaluate import EvaluateOptions, evaluate
 from ethdebug.data import Data
-from ethdebug.cursor import Region, Regions
-from ethdebug.format.pointer.expression_schema import Arithmetic, Constant, Literal, Lookup, Resize, Variable
+from ethdebug.dereference.cursor import Region, Regions
+from ethdebug.format.data.unsigned_schema import EthdebugFormatDataUnsigned
+from ethdebug.format.data.value_schema import EthdebugFormatDataValue
+from ethdebug.format.pointer.expression_schema import Arithmetic, Constant, EthdebugFormatPointerExpression, Literal, Lookup, Operands, Reference, Resize, Variable
+from ethdebug.format.pointer.identifier_schema import EthdebugFormatPointerIdentifier
 from ethdebug.machine import MachineState
 
 from tests.mock_machine import MockCalldata, MockCode, MockMemory, MockReturndata, MockStack, MockState, MockStorage, MockTransient
@@ -25,22 +28,23 @@ def state() -> MachineState:
 
 @pytest.fixture
 def options(state) -> EvaluateOptions:
-    return MockOptions(
+    return EvaluateOptions(
         variables = {
             "foo": Data.from_int(42),
             "bar": Data.from_hex("0x1f"),
         },
         regions = Regions((
-            MockRegion(
+            Region(
                 name="stack",
                 location="stack",
                 slot=Data.from_int(42),
                 offset=Data.from_int(0x60),
                 length=Data.from_int(0x1f // 2),
             ),
-            MockRegion(
+            Region(
                 name="memory",
                 location="memory",
+                slot=None,
                 offset=Data.from_int(0x20 * 0x05),
                 length=Data.from_int(42 - 0x1f),
             ),
@@ -48,10 +52,19 @@ def options(state) -> EvaluateOptions:
         state = state,
     )
 
+def uint(value: int) -> Literal:
+    return Literal(root=EthdebugFormatDataValue(EthdebugFormatDataUnsigned(value)))
+
+def hex(value: str) -> Literal:
+    return Literal(root=EthdebugFormatDataValue(EthdebugFormatDataUnsigned(int(value, 16))))
+
+def variable(name: str) -> Variable:
+    return Variable(root=EthdebugFormatPointerIdentifier(name))
+
 @pytest.mark.asyncio
 async def test_evaluates_literal_expressions(options):
-    assert await evaluate(Literal(42), options) == Data.from_int(42)
-    assert await evaluate(Literal("0x1f"), options) == Data.from_hex("0x1f")
+    assert await evaluate(uint(42), options) == Data.from_int(42)
+    assert await evaluate(hex("0x1f"), options) == Data.from_hex("0x1f")
 
 @pytest.mark.asyncio
 async def test_evaluates_constant_expressions(options):
@@ -59,8 +72,8 @@ async def test_evaluates_constant_expressions(options):
 
 @pytest.mark.asyncio
 async def test_evaluates_variable_expressions(options):
-    assert await evaluate(Variable("foo"), options) == Data.from_int(42)
-    assert await evaluate(Variable("bar"), options) == Data.from_hex("0x1f")
+    assert await evaluate(variable("foo"), options) == Data.from_int(42)
+    assert await evaluate(variable("bar"), options) == Data.from_hex("0x1f")
 
 @pytest.mark.asyncio
 async def test_evaluates_sum_expressions(options):
@@ -95,13 +108,14 @@ async def test_evaluates_offset_lookup_expressions(options):
 @pytest.mark.asyncio
 async def test_evaluates_offset_lookup_expressions_with_this(options):
     expression = Lookup(**{".offset": "$this"})
-    this_region = MockRegion(
+    this_region = Region(
         name="$this",
         location="memory",
+        slot=None,
         offset=Data.from_int(0x120),
         length=Data.from_int(0x40),
     )
-    options.regions = Regions((this_region,))
+    options.regions = options.regions.set_this(this_region)
     assert await evaluate(expression, options) == Data.from_int(0x120)
 
 @pytest.mark.asyncio
@@ -127,17 +141,3 @@ async def test_evaluates_resize_expressions(options):
     assert len(data) == 32
     assert data == Data.from_int(0xabcd).resize_to(32)
 
-
-class MockOptions:
-    def __init__(self, state, regions, variables):
-        self.state = state
-        self.regions = regions
-        self.variables = variables
-
-class MockRegion(Region):
-    def __init__(self, name, location, slot=None, offset=None, length=None):
-        self.name = name
-        self.location = location
-        self.slot = slot
-        self.offset = offset
-        self.length = length

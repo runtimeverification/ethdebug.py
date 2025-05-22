@@ -1,18 +1,31 @@
+from __future__ import annotations
 
-
+from dataclasses import dataclass
 from functools import singledispatch
 import typing
-from ethdebug import read
+from ethdebug.read import read
 from ethdebug.cursor import Region, Regions
 from ethdebug.data import Data
-from ethdebug.format.pointer.expression_schema import Arithmetic, Constant, EthdebugFormatPointerExpression, Keccak256, Literal, Lookup, Operands, Read, Resize, Variable
+from ethdebug.format.pointer.expression_schema import Arithmetic, Constant, EthdebugFormatPointerExpression, Keccak256, Literal, Lookup, Operands, Read, Reference, Resize, Variable
+from ethdebug.format.pointer.identifier_schema import EthdebugFormatPointerIdentifier
 from ethdebug.machine import MachineState
 from eth_hash.auto import keccak
 
+@dataclass
 class EvaluateOptions:
     state: MachineState
     regions: Regions
     variables: dict[str, Data]
+
+    def set_this(self, region: Region) -> EvaluateOptions:
+        """
+        Set the current region as $this.
+        """
+        return EvaluateOptions(
+            state=self.state,
+            regions=self.regions.set_this(region),
+            variables=self.variables
+        )
 
 @singledispatch
 async def evaluate(
@@ -206,10 +219,10 @@ async def _(expression: Keccak256, options: EvaluateOptions) -> Data:
     Evaluate a keccack256 expression.
     """
     # Concatenate all the operands
-    subs = []
-    for operand in expression.root:
+    subs : list[Data] = []
+    for operand in expression.field_keccak256:
         subs.append(await evaluate(operand.root, options))
-    preimage = Data.zero().concat(subs)
+    preimage = Data.zero().concat(*subs)
     hash = Data.from_bytes(keccak(preimage))
     return hash
 
@@ -218,7 +231,7 @@ async def _(expression: Lookup, options: EvaluateOptions) -> Data:
     """
     Evaluate a lookup expression.
     """
-    property : Literal['.slot', '.offset', '.length'] | None = None
+    property : typing.Literal['.slot', '.offset', '.length'] | None = None
     property_names = ['.slot', '.offset', '.length']
     for field in expression.root.keys():
         if field in property_names:
@@ -227,9 +240,11 @@ async def _(expression: Lookup, options: EvaluateOptions) -> Data:
     if property is None:
         raise ValueError(f"Invalid lookup operation: {expression.root}")
     
-    reference = expression.root.get(property)
+    reference : Reference | None = expression.root.get(property)
+    if reference is None:
+        raise ValueError(f"Invalid lookup operation: {expression.root}")
     
-    region = options.regions.lookup(reference.root)
+    region = options.regions.lookup(str(reference.root))
     if region is None:
         raise ValueError(f"Regiond not found: {reference.root}")
     
@@ -245,7 +260,7 @@ async def _(expression: Read, options: EvaluateOptions) -> Data:
     Evaluate a read expression.
     """
     identifier = expression.field_read
-    region = options.regions.lookup(identifier)
+    region = options.regions.lookup(str(identifier))
     if region is None:
         raise ValueError(f"Regiond not found: {identifier}")
     data = await read(region, options.state)
@@ -255,7 +270,7 @@ async def _(expression: Read, options: EvaluateOptions) -> Data:
 def region_lookup(
     property: typing.Literal['.slot', '.offset', '.length'],
     region: Region
-) -> Data:
+) -> Data | None:
     if property == '.slot':
         return region.slot
     elif property == '.offset':
