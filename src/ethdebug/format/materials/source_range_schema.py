@@ -3,32 +3,32 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Annotated, Optional
 
 from pydantic import BaseModel, Field
 
-from ..data import value_schema
-from . import reference_schema
+from ..data.value_schema import DataValue
+from .reference_schema import MaterialsReference
 
 
 class Range(BaseModel):
-    offset: value_schema.EthdebugFormatDataValue = Field(
-        ..., description='Byte offset at beginning of range.\n'
-    )
-    length: value_schema.EthdebugFormatDataValue = Field(
-        ..., description='Number of bytes contained in range'
-    )
+    offset: Annotated[
+        DataValue, Field(description='Byte offset at beginning of range.\n')
+    ]
+    length: Annotated[
+        DataValue, Field(description='Number of bytes contained in range')
+    ]
 
 
-class EthdebugFormatMaterialsSourceRange(BaseModel):
-    compilation: Optional[reference_schema.EthdebugFormatMaterialsReference] = Field(
-        None, title='Compilation reference by ID'
-    )
-    source: reference_schema.EthdebugFormatMaterialsReference = Field(
-        ..., title='Source reference by ID'
-    )
-    range: Optional[Range] = Field(
-        None,
-        description='Ranges that span the entire source contents **may** omit this field\nas a shorthand. This field is otherwise **required**.\n',
-        title='Bytes range within source contents',
-    )
+class MaterialsSourceRange(BaseModel):
+    compilation: Annotated[
+        Optional[MaterialsReference], Field(title='Compilation reference by ID')
+    ] = None
+    source: Annotated[MaterialsReference, Field(title='Source reference by ID')]
+    range: Annotated[
+        Optional[Range],
+        Field(
+            description='Ranges that span the entire source contents **may** omit this field\nas a shorthand. This field is otherwise **required**.\n',
+            title='Bytes range within source contents',
+        ),
+    ] = None

@@ -18,5 +18,10 @@ generate(
     target_python_version=PythonVersion.PY_312,
     allow_extra_fields=False,
     disable_timestamp=True,
-    reuse_model=True
+    reuse_model=True,
+    use_annotated=True,
+    field_constraints=True,
+    custom_class_name_generator=lambda x: x.title().replace("Ethdebug/Format/", "").replace("/", "_"),
+    use_exact_imports=True,
+    
 )

@@ -6,5 +6,5 @@ from __future__ import annotations
 from pydantic import BaseModel
 
 
-class EthdebugFormatProgramContextName(BaseModel):
+class ProgramContextName(BaseModel):
     name: str

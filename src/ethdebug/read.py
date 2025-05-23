@@ -24,3 +24,4 @@ async def read(region: Region, state: MachineState) -> Data:
         return await state.transient.read(slot, offset, length)
     elif location == "code":
         return await state.code.read(offset, length)
+    raise ValueError(f"Unknown location: {location}")

@@ -3,14 +3,14 @@
 
 from __future__ import annotations
 
-from typing import List
+from typing import Annotated, List
 
 from pydantic import BaseModel, Field
 
-from .. import context_schema
+from ..context_schema import ProgramContext
 
 
-class EthdebugFormatProgramContextPick(BaseModel):
-    pick: List[context_schema.EthdebugFormatProgramContext] = Field(
-        ..., min_length=2, title='Contexts to pick from'
-    )
+class ProgramContextPick(BaseModel):
+    pick: Annotated[
+        List[ProgramContext], Field(min_length=2, title='Contexts to pick from')
+    ]

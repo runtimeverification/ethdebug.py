@@ -8,7 +8,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from . import id_schema
+from .id_schema import MaterialsId
 
 
 class Type(Enum):
@@ -16,6 +16,6 @@ class Type(Enum):
     source = 'source'
 
 
-class EthdebugFormatMaterialsReference(BaseModel):
-    id: id_schema.EthdebugFormatMaterialsId
+class MaterialsReference(BaseModel):
+    id: MaterialsId
     type: Optional[Type] = None

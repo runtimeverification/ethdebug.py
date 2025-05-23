@@ -3,21 +3,23 @@
 
 from __future__ import annotations
 
-from typing import List
+from typing import Annotated, List
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from .. import pointer_schema
-from . import identifier_schema
+from ..pointer_schema import Pointer
+from .identifier_schema import PointerIdentifier
 
 
-class EthdebugFormatPointerTemplate(BaseModel):
+class PointerTemplate(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
-    expect: List[identifier_schema.EthdebugFormatPointerIdentifier] = Field(
-        ...,
-        description='An array of variable identifiers used in the definition of the\npointer template.\n',
-        title='Template variables',
-    )
-    for_: pointer_schema.EthdebugFormatPointer = Field(..., alias='for')
+    expect: Annotated[
+        List[PointerIdentifier],
+        Field(
+            description='An array of variable identifiers used in the definition of the\npointer template.\n',
+            title='Template variables',
+        ),
+    ]
+    for_: Annotated[Pointer, Field(alias='for')]

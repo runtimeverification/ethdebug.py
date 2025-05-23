@@ -3,16 +3,20 @@
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, Field, conint
+from pydantic import BaseModel, Field
 
 
-class EthdebugFormatTypeElementaryFixed(BaseModel):
-    class_: Literal['elementary'] = Field('elementary', alias='class')
+class TypeElementaryFixed(BaseModel):
+    class_: Annotated[Literal['elementary'], Field(alias='class')] = 'elementary'
     kind: Literal['fixed']
-    bits: conint(ge=8, le=256, multiple_of=8)
-    places: conint(ge=1, le=80) = Field(
-        ...,
-        description='How many decimal places, implying that a raw value `v` of this type should be interpreted as `v / (10**places)`',
-    )
+    bits: Annotated[int, Field(ge=8, le=256, multiple_of=8.0)]
+    places: Annotated[
+        int,
+        Field(
+            description='How many decimal places, implying that a raw value `v` of this type should be interpreted as `v / (10**places)`',
+            ge=1,
+            le=80,
+        ),
+    ]

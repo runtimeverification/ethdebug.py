@@ -1,18 +1,20 @@
 from functools import singledispatch
 from typing import TypeVar, Union
-from ethdebug.format.pointer.expression_schema import Arithmetic, EthdebugFormatPointerExpression, Literal
+from ethdebug.format.data.unsigned_schema import DataUnsigned
+from ethdebug.format.data.value_schema import DataValue
+from ethdebug.format.pointer.expression_schema import Arithmetic, Operands, PointerExpression, Literal
 from ethdebug.dereference.cursor import Region
 from ethdebug.data import Data
 from ethdebug.evaluate import evaluate, EvaluateOptions
-from ethdebug.format.pointer.region.stack_schema import EthdebugFormatPointerRegionStack
-from ethdebug.format.pointer.region_schema import EthdebugFormatPointerRegion
+from ethdebug.format.pointer.region.stack_schema import PointerRegionStack
+from ethdebug.format.pointer.region_schema import PointerRegion
 from dataclasses import replace
 
 class CircularReferenceError(Exception):
     pass
 
 async def evaluate_region(
-    region: EthdebugFormatPointerRegion,
+    region: PointerRegion,
     options: EvaluateOptions
 ) -> Region:
     """
@@ -44,13 +46,13 @@ async def evaluate_region(
         first_itereation = False
         last_region = this_region
         try:
-            if isinstance(this_region.offset, EthdebugFormatPointerExpression):
+            if isinstance(this_region.offset, PointerExpression):
                 data = await evaluate(this_region.offset, options=options.set_this(this_region))
                 this_region = replace(this_region, offset=data)
-            if isinstance(this_region.length, EthdebugFormatPointerExpression):
+            if isinstance(this_region.length, PointerExpression):
                 data = await evaluate(this_region.length.root, options=options.set_this(this_region))
                 this_region = replace(this_region, length=data)
-            if isinstance(this_region.slot, EthdebugFormatPointerExpression):
+            if isinstance(this_region.slot, PointerExpression):
                 data = await evaluate(this_region.slot.root, options=options.set_this(this_region))
                 this_region = replace(this_region, slot=data)
         except KeyError as e:
@@ -79,20 +81,26 @@ def is_fixed_point(a: Region, b: Region) -> bool:
         type(a.offset) == type(b.offset) and \
         type(a.length) == type(b.length)
 
+@singledispatch
 def adjust_stack_length(
-  region: EthdebugFormatPointerExpression,
+  region: PointerRegion,
   stack_length_change: int
-) -> EthdebugFormatPointerRegion:
+) -> PointerRegion:
+    return region
+
+@adjust_stack_length.register(PointerRegionStack)
+def _(region: PointerRegionStack, stack_length_change: int) -> PointerRegion:
+    slot : PointerExpression
     if stack_length_change == 0:
         slot = region.slot
     elif stack_length_change > 0:
-        slot = Arithmetic(field_sum=[region.slot, Literal(stack_length_change)])
+        slot = PointerExpression(root=Arithmetic(field_sum=Operands(root=[region.slot, PointerExpression(root=Literal(DataValue(root=DataUnsigned(stack_length_change))))])))
     else:
-        slot = Arithmetic(field_difference=[region.slot, Literal(stack_length_change)])
-    return EthdebugFormatPointerRegion(
+        slot = PointerExpression(root=Arithmetic(field_difference=Operands(root=[region.slot, PointerExpression(root=Literal(DataValue(root=DataUnsigned(stack_length_change))))])))
+    return PointerRegion(root=PointerRegionStack(
         location=region.location,
         name=region.name,
         slot=slot,
         offset=region.offset,
         length=region.length
-    )
+    ))

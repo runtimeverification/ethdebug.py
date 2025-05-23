@@ -3,11 +3,11 @@
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
 
 
-class EthdebugFormatTypeElementaryBool(BaseModel):
-    class_: Literal['elementary'] = Field('elementary', alias='class')
+class TypeElementaryBool(BaseModel):
+    class_: Annotated[Literal['elementary'], Field(alias='class')] = 'elementary'
     kind: Literal['bool']

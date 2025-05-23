@@ -5,20 +5,20 @@ from ethdebug.data import Data
 from ethdebug.evaluate import EvaluateOptions, evaluate
 from ethdebug.dereference.memo import DereferencePointer, Memo, SaveRegions, SaveVariables
 from ethdebug.dereference.region import adjust_stack_length, evaluate_region
-from ethdebug.format.pointer.collection.conditional_schema import EthdebugFormatPointerCollectionConditional
-from ethdebug.format.pointer.collection.group_schema import EthdebugFormatPointerCollectionGroup
-from ethdebug.format.pointer.collection.list_schema import EthdebugFormatPointerCollectionList
-from ethdebug.format.pointer.collection.reference_schema import EthdebugFormatPointerCollectionReference
-from ethdebug.format.pointer.collection.scope_schema import EthdebugFormatPointerCollectionScope
-from ethdebug.format.pointer.region_schema import EthdebugFormatPointerRegion
-from ethdebug.format.pointer.template_schema import EthdebugFormatPointerTemplate
-from ethdebug.format.pointer_schema import EthdebugFormatPointer
+from ethdebug.format.pointer.collection.conditional_schema import PointerCollectionConditional
+from ethdebug.format.pointer.collection.group_schema import PointerCollectionGroup
+from ethdebug.format.pointer.collection.list_schema import PointerCollectionList
+from ethdebug.format.pointer.collection.reference_schema import PointerCollectionReference
+from ethdebug.format.pointer.collection.scope_schema import PointerCollectionScope
+from ethdebug.format.pointer.region_schema import PointerRegion
+from ethdebug.format.pointer.template_schema import PointerTemplate
+from ethdebug.format.pointer_schema import Pointer
 from ethdebug.machine import MachineState
 from ethdebug.dereference.cursor import Region, Regions
 
 @dataclass
 class ProcessState:
-    templates: Dict[str, EthdebugFormatPointerTemplate]
+    templates: Dict[str, PointerTemplate]
     state: MachineState
     stack_length_change: int
     regions: Regions
@@ -29,13 +29,13 @@ Process = AsyncGenerator[Region | Memo]
 
 
 @singledispatch
-async def process_pointer(pointer: EthdebugFormatPointer, state: ProcessState) -> Process:
+async def process_pointer(pointer: Pointer, state: ProcessState) -> Process:
     raise TypeError(f"Unexpected pointer type: {type(pointer)}")
     yield None # <- If the function does not contain a yield statement, it will not be a generator function
 
 
-@process_pointer.register(EthdebugFormatPointerRegion)
-async def process_region(region: EthdebugFormatPointerRegion, state: ProcessState) -> Process:
+@process_pointer.register(PointerRegion)
+async def process_region(region: PointerRegion, state: ProcessState) -> Process:
     adjusted = adjust_stack_length(region, state.stack_length_change)
     evaluated_region = await evaluate_region(
         adjusted,
@@ -51,13 +51,13 @@ async def process_region(region: EthdebugFormatPointerRegion, state: ProcessStat
     if region.root.name is not None:
         yield SaveRegions(Regions((evaluated_region,)))
 
-@process_pointer.register(EthdebugFormatPointerCollectionGroup)
-async def process_group(collection: EthdebugFormatPointerCollectionGroup, options: ProcessState) -> Process:
+@process_pointer.register(PointerCollectionGroup)
+async def process_group(collection: PointerCollectionGroup, options: ProcessState) -> Process:
     for pointer in collection.group: 
         yield DereferencePointer(pointer)
 
-@process_pointer.register(EthdebugFormatPointerCollectionList)
-async def process_list(collection: EthdebugFormatPointerCollectionList, options: ProcessState) -> Process:
+@process_pointer.register(PointerCollectionList)
+async def process_list(collection: PointerCollectionList, options: ProcessState) -> Process:
     count = (await evaluate(collection.list.count.root, options)).as_uint()
     
     for index in range(count):
@@ -66,8 +66,8 @@ async def process_list(collection: EthdebugFormatPointerCollectionList, options:
         })
         yield DereferencePointer(collection.list.is_)
 
-@process_pointer.register(EthdebugFormatPointerCollectionConditional)
-async def process_conditional(collection: EthdebugFormatPointerCollectionConditional, options: ProcessState) -> Process:
+@process_pointer.register(PointerCollectionConditional)
+async def process_conditional(collection: PointerCollectionConditional, options: ProcessState) -> Process:
     condition = (await evaluate(collection.if_.root, options)).as_uint()
 
     if condition:
@@ -77,8 +77,8 @@ async def process_conditional(collection: EthdebugFormatPointerCollectionConditi
     if collection.else_ is not None:
         yield DereferencePointer(collection.else_)
 
-@process_pointer.register(EthdebugFormatPointerCollectionScope)
-async def process_scope(collection: EthdebugFormatPointerCollectionScope, options: ProcessState) -> Process:
+@process_pointer.register(PointerCollectionScope)
+async def process_scope(collection: PointerCollectionScope, options: ProcessState) -> Process:
     all_variables = options.variables.copy()
     new_variables = {}
 
@@ -90,8 +90,8 @@ async def process_scope(collection: EthdebugFormatPointerCollectionScope, option
     yield SaveVariables(new_variables)
     yield DereferencePointer(collection.in_)
 
-@process_pointer.register(EthdebugFormatPointerCollectionReference)
-async def process_reference(collection: EthdebugFormatPointerCollectionReference, options: ProcessState) -> Process:
+@process_pointer.register(PointerCollectionReference)
+async def process_reference(collection: PointerCollectionReference, options: ProcessState) -> Process:
     template_name = collection.template
     template = options.templates.get(template_name.root)
 

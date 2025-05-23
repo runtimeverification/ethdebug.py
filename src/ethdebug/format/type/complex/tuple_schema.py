@@ -3,21 +3,23 @@
 
 from __future__ import annotations
 
-from typing import List, Literal, Optional
+from typing import Annotated, List, Literal, Optional
 
 from pydantic import BaseModel, Field
 
-from ..wrapper_schema import EthdebugFormatTypeWrapper
+from ..wrapper_schema import TypeWrapper
 
 
-class Element(EthdebugFormatTypeWrapper):
-    name: Optional[str] = Field(
-        None,
-        description='For tuple types where positional element types are identified by name, this field **should** include this information.\nThis schema makes no restriction on whether all-or-no elements have names, and so this field may be sparse across elements of the same tuple.',
-    )
+class Element(TypeWrapper):
+    name: Annotated[
+        Optional[str],
+        Field(
+            description='For tuple types where positional element types are identified by name, this field **should** include this information.\nThis schema makes no restriction on whether all-or-no elements have names, and so this field may be sparse across elements of the same tuple.'
+        ),
+    ] = None
 
 
-class EthdebugFormatTypeComplexTuple(BaseModel):
-    class_: Literal['complex'] = Field('complex', alias='class')
+class TypeComplexTuple(BaseModel):
+    class_: Annotated[Literal['complex'], Field(alias='class')] = 'complex'
     kind: Literal['tuple']
     contains: List[Element]

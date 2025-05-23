@@ -7,10 +7,10 @@ from typing import List
 
 from pydantic import BaseModel
 
-from . import program_schema
-from .materials import compilation_schema
+from .materials.compilation_schema import MaterialsCompilation
+from .program_schema import Program
 
 
-class EthdebugFormatInfo(BaseModel):
-    programs: List[program_schema.EthdebugFormatProgram]
-    compilation: compilation_schema.EthdebugFormatMaterialsCompilation
+class Info(BaseModel):
+    programs: List[Program]
+    compilation: MaterialsCompilation

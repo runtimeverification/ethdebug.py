@@ -3,10 +3,10 @@ from unittest.mock import AsyncMock
 from ethdebug.evaluate import EvaluateOptions, evaluate
 from ethdebug.data import Data
 from ethdebug.dereference.cursor import Region, Regions
-from ethdebug.format.data.unsigned_schema import EthdebugFormatDataUnsigned
-from ethdebug.format.data.value_schema import EthdebugFormatDataValue
-from ethdebug.format.pointer.expression_schema import Arithmetic, Constant, EthdebugFormatPointerExpression, Literal, Lookup, Operands, Reference, Resize, Variable
-from ethdebug.format.pointer.identifier_schema import EthdebugFormatPointerIdentifier
+from ethdebug.format.data.unsigned_schema import DataUnsigned
+from ethdebug.format.data.value_schema import DataValue
+from ethdebug.format.pointer.expression_schema import Arithmetic, Constant, Literal, Lookup, Resize, Variable
+from ethdebug.format.pointer.identifier_schema import PointerIdentifier
 from ethdebug.machine import MachineState
 
 from tests.mock_machine import MockCalldata, MockCode, MockMemory, MockReturndata, MockStack, MockState, MockStorage, MockTransient
@@ -53,13 +53,13 @@ def options(state) -> EvaluateOptions:
     )
 
 def uint(value: int) -> Literal:
-    return Literal(root=EthdebugFormatDataValue(EthdebugFormatDataUnsigned(value)))
+    return Literal(root=DataValue(DataUnsigned(value)))
 
 def hex(value: str) -> Literal:
-    return Literal(root=EthdebugFormatDataValue(EthdebugFormatDataUnsigned(int(value, 16))))
+    return Literal(root=DataValue(DataUnsigned(int(value, 16))))
 
 def variable(name: str) -> Variable:
-    return Variable(root=EthdebugFormatPointerIdentifier(name))
+    return Variable(root=PointerIdentifier(name))
 
 @pytest.mark.asyncio
 async def test_evaluates_literal_expressions(options):

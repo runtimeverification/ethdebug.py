@@ -3,20 +3,20 @@
 
 from __future__ import annotations
 
-from typing import List, Literal, Optional
+from typing import Annotated, List, Literal, Optional
 
 from pydantic import BaseModel, Field
 
-from .. import definition_schema
-from ..wrapper_schema import EthdebugFormatTypeWrapper
+from ..definition_schema import TypeDefinition
+from ..wrapper_schema import TypeWrapper
 
 
-class MemberField(EthdebugFormatTypeWrapper):
+class Memberfield(TypeWrapper):
     name: Optional[str] = None
 
 
-class EthdebugFormatTypeComplexStruct(BaseModel):
-    class_: Literal['complex'] = Field('complex', alias='class')
+class TypeComplexStruct(BaseModel):
+    class_: Annotated[Literal['complex'], Field(alias='class')] = 'complex'
     kind: Literal['struct']
-    contains: List[MemberField]
-    definition: Optional[definition_schema.EthdebugFormatTypeDefinition] = None
+    contains: List[Memberfield]
+    definition: Optional[TypeDefinition] = None

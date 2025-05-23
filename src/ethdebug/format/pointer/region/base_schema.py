@@ -8,7 +8,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from .. import identifier_schema
+from ..identifier_schema import PointerIdentifier
 
 
 class Location(Enum):
@@ -21,6 +21,6 @@ class Location(Enum):
     code = 'code'
 
 
-class EthdebugFormatPointerRegionBase(BaseModel):
-    name: Optional[identifier_schema.EthdebugFormatPointerIdentifier] = None
+class PointerRegionBase(BaseModel):
+    name: Optional[PointerIdentifier] = None
     location: Location

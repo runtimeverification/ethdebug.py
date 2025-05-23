@@ -3,8 +3,10 @@
 
 from __future__ import annotations
 
+from typing import Annotated
+
 from pydantic import BaseModel, Field
 
 
-class EthdebugFormatProgramContextFrame(BaseModel):
-    frame: str = Field(..., title='Relevant compilation frame')
+class ProgramContextFrame(BaseModel):
+    frame: Annotated[str, Field(title='Relevant compilation frame')]

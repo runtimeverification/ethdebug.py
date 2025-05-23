@@ -1,7 +1,7 @@
 from dataclasses import dataclass, replace
 from typing import  AsyncIterable, Dict
-from ethdebug.format.pointer_schema import EthdebugFormatPointer
-from ethdebug.format.pointer.template_schema import EthdebugFormatPointerTemplate
+from ethdebug.format.pointer_schema import Pointer
+from ethdebug.format.pointer.template_schema import PointerTemplate
 from ethdebug.machine import MachineState
 from ethdebug.dereference.cursor import Cursor, Region
 from ethdebug.dereference.generate import generate_regions, GenerateRegionsOptions
@@ -12,9 +12,9 @@ class DereferenceOptions:
     Options for dereferencing a pointer.
     """
     state: MachineState
-    templates: Dict[str, EthdebugFormatPointerTemplate]
+    templates: Dict[str, PointerTemplate]
 
-async def dereference(pointer: EthdebugFormatPointer, dereference_options: DereferenceOptions) -> Cursor:
+async def dereference(pointer: Pointer, dereference_options: DereferenceOptions) -> Cursor:
     """
     Dereference a pointer into a Cursor object, allowing inspection of machine state.
 

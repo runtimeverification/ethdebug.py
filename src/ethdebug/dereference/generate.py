@@ -1,8 +1,8 @@
 from typing import AsyncIterable, Dict, List
 from dataclasses import dataclass, replace
 from ethdebug.dereference.cursor import Regions, Region
-from ethdebug.format.pointer.template_schema import EthdebugFormatPointerTemplate
-from ethdebug.format.pointer_schema import EthdebugFormatPointer
+from ethdebug.format.pointer.template_schema import PointerTemplate
+from ethdebug.format.pointer_schema import Pointer
 from ethdebug.machine import MachineState
 from ethdebug.data import Data
 from .memo import DereferencePointer, Memo, SaveRegions, SaveVariables
@@ -10,12 +10,12 @@ from .process import process_pointer, ProcessState
 
 @dataclass
 class GenerateRegionsOptions:
-    templates: Dict[str, EthdebugFormatPointerTemplate]
+    templates: Dict[str, PointerTemplate]
     state: MachineState
     initial_stack_length: int
 
 async def generate_regions(
-    pointer: EthdebugFormatPointer,
+    pointer: Pointer,
     options: GenerateRegionsOptions
 ) -> AsyncIterable[Region]:
     process_options = await initialize_process_state(options)

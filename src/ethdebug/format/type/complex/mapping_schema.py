@@ -3,19 +3,19 @@
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
 
-from .. import wrapper_schema
+from ..wrapper_schema import TypeWrapper
 
 
 class Contains(BaseModel):
-    key: wrapper_schema.EthdebugFormatTypeWrapper
-    value: wrapper_schema.EthdebugFormatTypeWrapper
+    key: TypeWrapper
+    value: TypeWrapper
 
 
-class EthdebugFormatTypeComplexMapping(BaseModel):
-    class_: Literal['complex'] = Field('complex', alias='class')
+class TypeComplexMapping(BaseModel):
+    class_: Annotated[Literal['complex'], Field(alias='class')] = 'complex'
     kind: Literal['mapping']
-    contains: Contains = Field(..., title='Mapping key/value types')
+    contains: Annotated[Contains, Field(title='Mapping key/value types')]

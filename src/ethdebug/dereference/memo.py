@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from typing import Union, Dict
 from dataclasses import dataclass
-from ethdebug.format.pointer_schema import EthdebugFormatPointer
+from ethdebug.format.pointer_schema import Pointer
 from ethdebug.cursor import Regions
 from ethdebug.data import Data
 
 @dataclass
 class DereferencePointer:
-    pointer: EthdebugFormatPointer
+    pointer: Pointer
 
 @dataclass
 class SaveRegions:

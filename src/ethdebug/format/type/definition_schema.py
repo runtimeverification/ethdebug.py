@@ -3,37 +3,37 @@
 
 from __future__ import annotations
 
-from typing import Optional, Union
+from typing import Annotated, Optional, Union
 
 from pydantic import BaseModel, Field, RootModel
 
-from ..materials import source_range_schema
+from ..materials.source_range_schema import MaterialsSourceRange
 
 
-class EthdebugFormatTypeDefinition1(BaseModel):
+class Type_Definition(BaseModel):
     name: str
-    location: Optional[source_range_schema.EthdebugFormatMaterialsSourceRange] = None
+    location: Optional[MaterialsSourceRange] = None
 
 
-class EthdebugFormatTypeDefinition2(BaseModel):
+class TypeDefinition2(BaseModel):
     name: Optional[str] = None
-    location: source_range_schema.EthdebugFormatMaterialsSourceRange
+    location: MaterialsSourceRange
 
 
-class EthdebugFormatTypeDefinition(
-    RootModel[Union[EthdebugFormatTypeDefinition1, EthdebugFormatTypeDefinition2]]
-):
-    root: Union[EthdebugFormatTypeDefinition1, EthdebugFormatTypeDefinition2] = Field(
-        ...,
-        description='Object containing name and location information for a type.\n\nThis schema does not require any particular field, but it **must** contain\nat least one property.\n',
-        examples=[
-            {
-                'name': 'Ballot',
-                'location': {
-                    'source': {'id': 5},
-                    'range': {'offset': 10, 'length': 56},
-                },
-            }
-        ],
-        title='ethdebug/format/type/definition',
-    )
+class TypeDefinition(RootModel[Union[Type_Definition, TypeDefinition2]]):
+    root: Annotated[
+        Union[Type_Definition, TypeDefinition2],
+        Field(
+            description='Object containing name and location information for a type.\n\nThis schema does not require any particular field, but it **must** contain\nat least one property.\n',
+            examples=[
+                {
+                    'name': 'Ballot',
+                    'location': {
+                        'source': {'id': 5},
+                        'range': {'offset': 10, 'length': 56},
+                    },
+                }
+            ],
+            title='ethdebug/format/type/definition',
+        ),
+    ]

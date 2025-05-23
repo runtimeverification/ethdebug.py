@@ -8,7 +8,7 @@ from typing import Union
 from pydantic import BaseModel, ConfigDict
 
 
-class EthdebugFormatTypeReference(BaseModel):
+class TypeReference(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )

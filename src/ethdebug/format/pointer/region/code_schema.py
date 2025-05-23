@@ -5,11 +5,9 @@ from __future__ import annotations
 
 from typing import Literal
 
-from ..scheme.slice_schema import EthdebugFormatPointerSchemeSlice
-from .base_schema import EthdebugFormatPointerRegionBase
+from ..scheme.slice_schema import PointerSchemeSlice
+from .base_schema import PointerRegionBase
 
 
-class EthdebugFormatPointerRegionCode(
-    EthdebugFormatPointerRegionBase, EthdebugFormatPointerSchemeSlice
-):
+class PointerRegionCode(PointerRegionBase, PointerSchemeSlice):
     location: Literal['code']

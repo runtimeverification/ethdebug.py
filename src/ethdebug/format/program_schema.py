@@ -4,12 +4,14 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import List, Optional
+from typing import Annotated, List, Optional
 
 from pydantic import BaseModel, Field
 
-from .materials import reference_schema, source_range_schema
-from .program import context_schema, instruction_schema
+from .materials.reference_schema import MaterialsReference
+from .materials.source_range_schema import MaterialsSourceRange
+from .program.context_schema import ProgramContext
+from .program.instruction_schema import ProgramInstruction
 
 
 class Environment(Enum):
@@ -19,25 +21,32 @@ class Environment(Enum):
 
 class Contract(BaseModel):
     name: Optional[str] = None
-    definition: source_range_schema.EthdebugFormatMaterialsSourceRange
+    definition: MaterialsSourceRange
 
 
-class EthdebugFormatProgram(BaseModel):
-    compilation: Optional[reference_schema.EthdebugFormatMaterialsReference] = Field(
-        None,
-        description='A reference to the compilation as an `{ "id": ... }` object.\n',
-        title='Compilation reference by ID',
-    )
+class Program(BaseModel):
+    compilation: Annotated[
+        Optional[MaterialsReference],
+        Field(
+            description='A reference to the compilation as an `{ "id": ... }` object.\n',
+            title='Compilation reference by ID',
+        ),
+    ] = None
     contract: Contract
-    environment: Environment = Field(
-        ...,
-        description='Whether this bytecode is for contract creation or runtime calls.\n',
-        title='Bytecode execution environment',
-    )
-    context: Optional[context_schema.EthdebugFormatProgramContext] = Field(
-        {},
-        description='The context known to exist prior to the execution of the first\ninstruction in the bytecode.\n\nThis field is **optional**. Omitting it is equivalent to specifying the\nempty context value (`{}`).\n',
-    )
-    instructions: List[instruction_schema.EthdebugFormatProgramInstruction] = Field(
-        ..., description='The full array of instructions for the bytecode.\n'
-    )
+    environment: Annotated[
+        Environment,
+        Field(
+            description='Whether this bytecode is for contract creation or runtime calls.\n',
+            title='Bytecode execution environment',
+        ),
+    ]
+    context: Annotated[
+        Optional[ProgramContext],
+        Field(
+            description='The context known to exist prior to the execution of the first\ninstruction in the bytecode.\n\nThis field is **optional**. Omitting it is equivalent to specifying the\nempty context value (`{}`).\n'
+        ),
+    ] = {}
+    instructions: Annotated[
+        List[ProgramInstruction],
+        Field(description='The full array of instructions for the bytecode.\n'),
+    ]

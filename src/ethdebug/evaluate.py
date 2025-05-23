@@ -6,8 +6,8 @@ import typing
 from ethdebug.read import read
 from ethdebug.cursor import Region, Regions
 from ethdebug.data import Data
-from ethdebug.format.pointer.expression_schema import Arithmetic, Constant, EthdebugFormatPointerExpression, Keccak256, Literal, Lookup, Operands, Read, Reference, Resize, Variable
-from ethdebug.format.pointer.identifier_schema import EthdebugFormatPointerIdentifier
+from ethdebug.format.pointer.expression_schema import Arithmetic, Constant, PointerExpression, Keccak256, Literal, Lookup, Operands, Read, Reference, Resize, Variable
+from ethdebug.format.pointer.identifier_schema import PointerIdentifier
 from ethdebug.machine import MachineState
 from eth_hash.auto import keccak
 
@@ -29,7 +29,7 @@ class EvaluateOptions:
 
 @singledispatch
 async def evaluate(
-    expression: EthdebugFormatPointerExpression,
+    expression: PointerExpression,
     options: EvaluateOptions,
 ) -> Data:
     raise ValueError("Unsupported expression type")
@@ -235,7 +235,7 @@ async def _(expression: Lookup, options: EvaluateOptions) -> Data:
     property_names = ['.slot', '.offset', '.length']
     for field in expression.root.keys():
         if field in property_names:
-            property = field
+            property = typing.cast(typing.Literal['.slot', '.offset', '.length'], field)
             break
     if property is None:
         raise ValueError(f"Invalid lookup operation: {expression.root}")

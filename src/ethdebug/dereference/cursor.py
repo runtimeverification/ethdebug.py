@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import AsyncIterable, Callable
 
 from ethdebug.data import Data
-from ethdebug.format.pointer.expression_schema import EthdebugFormatPointerExpression
+from ethdebug.format.pointer.expression_schema import PointerExpression
 from ..machine import MachineState
 from ..read import read
 from ..cursor import Regions as RegionsABC, Region as RegionABC, Cursor as CursorABC, View as ViewABC
@@ -61,9 +61,9 @@ class Region(RegionABC):
     """
     location: str
     name: str | None
-    slot: EthdebugFormatPointerExpression | Data | None
-    offset: EthdebugFormatPointerExpression | Data | None
-    length: EthdebugFormatPointerExpression | Data | None
+    slot: PointerExpression | Data | None
+    offset: PointerExpression | Data | None
+    length: PointerExpression | Data | None
 
 @dataclass
 class Regions(RegionsABC):

@@ -3,53 +3,53 @@
 
 from __future__ import annotations
 
-from typing import Union
+from typing import Annotated, Union
 
 from pydantic import Field, RootModel
 
-from .region import (
-    calldata_schema,
-    code_schema,
-    memory_schema,
-    returndata_schema,
-    stack_schema,
-    storage_schema,
-    transient_schema,
-)
+from .region.calldata_schema import PointerRegionCalldata
+from .region.code_schema import PointerRegionCode
+from .region.memory_schema import PointerRegionMemory
+from .region.returndata_schema import PointerRegionReturndata
+from .region.stack_schema import PointerRegionStack
+from .region.storage_schema import PointerRegionStorage
+from .region.transient_schema import PointerRegionTransient
 
 
-class EthdebugFormatPointerRegion(
+class PointerRegion(
     RootModel[
         Union[
-            stack_schema.EthdebugFormatPointerRegionStack,
-            memory_schema.EthdebugFormatPointerRegionMemory,
-            storage_schema.EthdebugFormatPointerRegionStorage,
-            calldata_schema.EthdebugFormatPointerRegionCalldata,
-            returndata_schema.EthdebugFormatPointerRegionReturndata,
-            transient_schema.EthdebugFormatPointerRegionTransient,
-            code_schema.EthdebugFormatPointerRegionCode,
+            PointerRegionStack,
+            PointerRegionMemory,
+            PointerRegionStorage,
+            PointerRegionCalldata,
+            PointerRegionReturndata,
+            PointerRegionTransient,
+            PointerRegionCode,
         ]
     ]
 ):
-    root: Union[
-        stack_schema.EthdebugFormatPointerRegionStack,
-        memory_schema.EthdebugFormatPointerRegionMemory,
-        storage_schema.EthdebugFormatPointerRegionStorage,
-        calldata_schema.EthdebugFormatPointerRegionCalldata,
-        returndata_schema.EthdebugFormatPointerRegionReturndata,
-        transient_schema.EthdebugFormatPointerRegionTransient,
-        code_schema.EthdebugFormatPointerRegionCode,
-    ] = Field(
-        ...,
-        description='A representation of a region of data in the EVM\n',
-        examples=[
-            {
-                'location': 'storage',
-                'slot': '0x0000000000000000000000000000000000000000000000000000000000000000',
-            }
+    root: Annotated[
+        Union[
+            PointerRegionStack,
+            PointerRegionMemory,
+            PointerRegionStorage,
+            PointerRegionCalldata,
+            PointerRegionReturndata,
+            PointerRegionTransient,
+            PointerRegionCode,
         ],
-        title='ethdebug/format/pointer/region',
-    )
+        Field(
+            description='A representation of a region of data in the EVM\n',
+            examples=[
+                {
+                    'location': 'storage',
+                    'slot': '0x0000000000000000000000000000000000000000000000000000000000000000',
+                }
+            ],
+            title='ethdebug/format/pointer/region',
+        ),
+    ]
 
 
-EthdebugFormatPointerRegion.model_rebuild()
+PointerRegion.model_rebuild()

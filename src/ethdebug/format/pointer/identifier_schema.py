@@ -3,15 +3,18 @@
 
 from __future__ import annotations
 
-from pydantic import Field, RootModel, constr
+from typing import Annotated
+
+from pydantic import Field, RootModel
 
 
-class EthdebugFormatPointerIdentifier(
-    RootModel[constr(pattern=r'^[a-zA-Z_\-]+[a-zA-Z0-9$_\-]*$')]
-):
-    root: constr(pattern=r'^[a-zA-Z_\-]+[a-zA-Z0-9$_\-]*$') = Field(
-        ...,
-        description='An identifier for use within the context of a root pointer\n',
-        examples=['a', 'a0', '-$', '__init__'],
-        title='ethdebug/format/pointer/identifier',
-    )
+class PointerIdentifier(RootModel[str]):
+    root: Annotated[
+        str,
+        Field(
+            description='An identifier for use within the context of a root pointer\n',
+            examples=['a', 'a0', '-$', '__init__'],
+            pattern='^[a-zA-Z_\\-]+[a-zA-Z0-9$_\\-]*$',
+            title='ethdebug/format/pointer/identifier',
+        ),
+    ]

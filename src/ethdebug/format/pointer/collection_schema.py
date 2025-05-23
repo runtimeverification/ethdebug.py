@@ -3,41 +3,41 @@
 
 from __future__ import annotations
 
-from typing import Union
+from typing import Annotated, Union
 
 from pydantic import Field, RootModel
 
-from .collection import (
-    conditional_schema,
-    group_schema,
-    list_schema,
-    reference_schema,
-    scope_schema,
-)
+from .collection.conditional_schema import PointerCollectionConditional
+from .collection.group_schema import PointerCollectionGroup
+from .collection.list_schema import PointerCollectionList
+from .collection.reference_schema import PointerCollectionReference
+from .collection.scope_schema import PointerCollectionScope
 
 
-class EthdebugFormatPointerCollection(
+class PointerCollection(
     RootModel[
         Union[
-            group_schema.EthdebugFormatPointerCollectionGroup,
-            list_schema.EthdebugFormatPointerCollectionList,
-            conditional_schema.EthdebugFormatPointerCollectionConditional,
-            scope_schema.EthdebugFormatPointerCollectionScope,
-            reference_schema.EthdebugFormatPointerCollectionReference,
+            PointerCollectionGroup,
+            PointerCollectionList,
+            PointerCollectionConditional,
+            PointerCollectionScope,
+            PointerCollectionReference,
         ]
     ]
 ):
-    root: Union[
-        group_schema.EthdebugFormatPointerCollectionGroup,
-        list_schema.EthdebugFormatPointerCollectionList,
-        conditional_schema.EthdebugFormatPointerCollectionConditional,
-        scope_schema.EthdebugFormatPointerCollectionScope,
-        reference_schema.EthdebugFormatPointerCollectionReference,
-    ] = Field(
-        ...,
-        description='A representation of a collection of pointers to data in the EVM\n',
-        title='ethdebug/format/pointer/collection',
-    )
+    root: Annotated[
+        Union[
+            PointerCollectionGroup,
+            PointerCollectionList,
+            PointerCollectionConditional,
+            PointerCollectionScope,
+            PointerCollectionReference,
+        ],
+        Field(
+            description='A representation of a collection of pointers to data in the EVM\n',
+            title='ethdebug/format/pointer/collection',
+        ),
+    ]
 
 
-EthdebugFormatPointerCollection.model_rebuild()
+PointerCollection.model_rebuild()

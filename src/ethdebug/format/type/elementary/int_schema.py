@@ -3,12 +3,12 @@
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, Field, conint
+from pydantic import BaseModel, Field
 
 
-class EthdebugFormatTypeElementaryInt(BaseModel):
-    class_: Literal['elementary'] = Field('elementary', alias='class')
+class TypeElementaryInt(BaseModel):
+    class_: Annotated[Literal['elementary'], Field(alias='class')] = 'elementary'
     kind: Literal['int']
-    bits: conint(ge=8, le=256, multiple_of=8)
+    bits: Annotated[int, Field(ge=8, le=256, multiple_of=8.0)]

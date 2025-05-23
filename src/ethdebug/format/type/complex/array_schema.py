@@ -3,14 +3,14 @@
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
 
-from .. import wrapper_schema
+from ..wrapper_schema import TypeWrapper
 
 
-class EthdebugFormatTypeComplexArray(BaseModel):
-    class_: Literal['complex'] = Field('complex', alias='class')
+class TypeComplexArray(BaseModel):
+    class_: Annotated[Literal['complex'], Field(alias='class')] = 'complex'
     kind: Literal['array']
-    contains: wrapper_schema.EthdebugFormatTypeWrapper
+    contains: TypeWrapper
