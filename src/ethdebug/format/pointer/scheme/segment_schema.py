@@ -3,22 +3,24 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Annotated, Optional
 
 from pydantic import BaseModel, Field
 
-from .. import expression_schema
+from ..expression_schema import PointerExpression
 
 
-class EthdebugFormatPointerSchemeSegment(BaseModel):
-    slot: expression_schema.EthdebugFormatPointerExpression
-    offset: Optional[expression_schema.EthdebugFormatPointerExpression] = Field(
-        0,
-        description="The starting byte index within the slot.\n\nThis field is **optional**. If unspecified, it has the default value of\n`0`, indicating that the segment begins at the start of the specified\nslot.\n\nThis field's expression must resolve to a value _n_ such that\n0&nbsp;≤&nbsp;_n_&nbsp;\\<&nbsp;`$wordsize` (i.e., the offset **must**\nbegin inside the slot).\n",
-    )
-    length: Optional[expression_schema.EthdebugFormatPointerExpression] = Field(
-        default_factory=lambda: expression_schema.EthdebugFormatPointerExpression.model_validate(
-            {'$difference': ['$wordsize', {'.offset': '$this'}]}
+class PointerSchemeSegment(BaseModel):
+    slot: PointerExpression
+    offset: Annotated[
+        Optional[PointerExpression],
+        Field(
+            description="The starting byte index within the slot.\n\nThis field is **optional**. If unspecified, it has the default value of\n`0`, indicating that the segment begins at the start of the specified\nslot.\n\nThis field's expression must resolve to a value _n_ such that\n0&nbsp;≤&nbsp;_n_&nbsp;\\<&nbsp;`$wordsize` (i.e., the offset **must**\nbegin inside the slot).\n"
         ),
-        description='The length of the bytes range this segment represents.\n\nThis field is **optional**. If unspecified, its default value indicates\nthat the segment ends at the end of the slot.\n\nIf this field has value larger than the default value, i.e., if the\nsegment extends beyond the last byte in the slot, then this segment is\ndefined to be the concatenation of the sequentially-addressed slot(s)\nfollowing following the slot specified.\n',
-    )
+    ] = 0
+    length: Annotated[
+        Optional[PointerExpression],
+        Field(
+            description='The length of the bytes range this segment represents.\n\nThis field is **optional**. If unspecified, its default value indicates\nthat the segment ends at the end of the slot.\n\nIf this field has value larger than the default value, i.e., if the\nsegment extends beyond the last byte in the slot, then this segment is\ndefined to be the concatenation of the sequentially-addressed slot(s)\nfollowing following the slot specified.\n'
+        ),
+    ] = {'$difference': ['$wordsize', {'.offset': '$this'}]}

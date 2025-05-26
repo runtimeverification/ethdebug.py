@@ -3,56 +3,64 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, Field, RootModel
 
-from . import reference_schema
+from .reference_schema import TypeReference
 
 
-class ElementaryType(BaseModel):
-    class_: Literal['elementary'] = Field('elementary', alias='class')
+class Elementarytype(BaseModel):
+    class_: Annotated[Literal['elementary'], Field(alias='class')] = 'elementary'
     kind: str
     contains: Optional[Any] = None
 
 
-class EthdebugFormatTypeBase(RootModel[Union[ElementaryType, ComplexType]]):
-    root: Union[ElementaryType, ComplexType] = Field(
-        ...,
-        description='Defines the minimally necessary schema for a data type. Types belong to a particular `class` (`"elementary"` or `"complex"`), and are further identified by a particular `kind`.',
-        title='ethdebug/format/type/base',
-    )
+class TypeBase(RootModel[Union[Elementarytype, Complextype]]):
+    root: Annotated[
+        Union[Elementarytype, Complextype],
+        Field(
+            description='Defines the minimally necessary schema for a data type. Types belong to a particular `class` (`"elementary"` or `"complex"`), and are further identified by a particular `kind`.',
+            title='ethdebug/format/type/base',
+        ),
+    ]
 
 
-class ComplexType(BaseModel):
-    class_: Literal['complex'] = Field(
-        'complex', alias='class', description='Indicates that this is a complex type'
-    )
-    kind: str = Field(
-        ..., description='The specific kind of complex type, e.g., array or struct'
-    )
-    contains: Union[TypeWrapper, TypeWrapperArray, TypeWrapperObject] = Field(
-        ...,
-        description='Either a type wrapper, an array of type wrappers, or an object mapping to type wrappers.',
-        title='Complex type `contains` field',
-    )
+class Complextype(BaseModel):
+    class_: Annotated[
+        Literal['complex'],
+        Field(alias='class', description='Indicates that this is a complex type'),
+    ] = 'complex'
+    kind: Annotated[
+        str,
+        Field(description='The specific kind of complex type, e.g., array or struct'),
+    ]
+    contains: Annotated[
+        Union[Typewrapper, Typewrapperarray, Typewrapperobject],
+        Field(
+            description='Either a type wrapper, an array of type wrappers, or an object mapping to type wrappers.',
+            title='Complex type `contains` field',
+        ),
+    ]
 
 
-class TypeWrapper(BaseModel):
-    type: Union[EthdebugFormatTypeBase, reference_schema.EthdebugFormatTypeReference]
+class Typewrapper(BaseModel):
+    type: Union[TypeBase, TypeReference]
 
 
-class TypeWrapperArray(RootModel[List[TypeWrapper]]):
-    root: List[TypeWrapper] = Field(
-        ...,
-        description='A list of wrapped types, where the wrapper may add fields',
-        title='{ "type": ... }[]',
-    )
+class Typewrapperarray(RootModel[List[Typewrapper]]):
+    root: Annotated[
+        List[Typewrapper],
+        Field(
+            description='A list of wrapped types, where the wrapper may add fields',
+            title='{ "type": ... }[]',
+        ),
+    ]
 
 
-class TypeWrapperObject(RootModel[Optional[Dict[str, TypeWrapper]]]):
-    root: Optional[Dict[str, TypeWrapper]] = None
+class Typewrapperobject(RootModel[Optional[Dict[str, Typewrapper]]]):
+    root: Optional[Dict[str, Typewrapper]] = None
 
 
-EthdebugFormatTypeBase.model_rebuild()
-ComplexType.model_rebuild()
+TypeBase.model_rebuild()
+Complextype.model_rebuild()

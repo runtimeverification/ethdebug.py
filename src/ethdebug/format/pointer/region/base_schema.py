@@ -3,13 +3,24 @@
 
 from __future__ import annotations
 
+from enum import Enum
 from typing import Optional
 
 from pydantic import BaseModel
 
-from .. import identifier_schema
+from ..identifier_schema import PointerIdentifier
 
 
-class EthdebugFormatPointerRegionBase(BaseModel):
-    name: Optional[identifier_schema.EthdebugFormatPointerIdentifier] = None
-    location: str
+class Location(Enum):
+    stack = 'stack'
+    memory = 'memory'
+    storage = 'storage'
+    calldata = 'calldata'
+    returndata = 'returndata'
+    transient = 'transient'
+    code = 'code'
+
+
+class PointerRegionBase(BaseModel):
+    name: Optional[PointerIdentifier] = None
+    location: Location

@@ -3,31 +3,41 @@
 
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import Annotated, List, Optional
 
 from pydantic import BaseModel, Field
 
-from ..data import value_schema
-from . import context_schema
+from ..data.value_schema import DataValue
+from .context_schema import ProgramContext
 
 
 class Operation(BaseModel):
-    mnemonic: str = Field(..., description='The mnemonic operation code (PUSH1, e.g.)')
-    arguments: Optional[List[value_schema.EthdebugFormatDataValue]] = Field(
-        None,
-        description='The immediate arguments to the operation, if relevant.',
-        min_length=1,
-    )
+    mnemonic: Annotated[
+        str, Field(description='The mnemonic operation code (PUSH1, e.g.)')
+    ]
+    arguments: Annotated[
+        Optional[List[DataValue]],
+        Field(
+            description='The immediate arguments to the operation, if relevant.',
+            min_length=1,
+        ),
+    ] = None
 
 
-class EthdebugFormatProgramInstruction(BaseModel):
-    offset: value_schema.EthdebugFormatDataValue = Field(
-        ...,
-        description="The byte offset where the instruction begins within the bytecode.\n\nFor legacy contract bytecode (non-EOF), this value is equivalent to the\ninstruction's program counter. For EOF bytecode, this value **must** be\nthe offset from the start of the container, not the start of a particular\ncode section within that container.\n",
-        title='Instruction byte offset',
-    )
-    operation: Optional[Operation] = Field(None, title='Machine operation information')
-    context: Optional[context_schema.EthdebugFormatProgramContext] = Field(
-        {},
-        description='The context known to exist following the execution of this instruction.\n\nThis field is **optional**. Omitting it is equivalent to specifying the\nempty context value (`{}`).\n',
-    )
+class ProgramInstruction(BaseModel):
+    offset: Annotated[
+        DataValue,
+        Field(
+            description="The byte offset where the instruction begins within the bytecode.\n\nFor legacy contract bytecode (non-EOF), this value is equivalent to the\ninstruction's program counter. For EOF bytecode, this value **must** be\nthe offset from the start of the container, not the start of a particular\ncode section within that container.\n",
+            title='Instruction byte offset',
+        ),
+    ]
+    operation: Annotated[
+        Optional[Operation], Field(title='Machine operation information')
+    ] = None
+    context: Annotated[
+        Optional[ProgramContext],
+        Field(
+            description='The context known to exist following the execution of this instruction.\n\nThis field is **optional**. Omitting it is equivalent to specifying the\nempty context value (`{}`).\n'
+        ),
+    ] = {}

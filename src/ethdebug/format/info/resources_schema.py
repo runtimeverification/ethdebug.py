@@ -3,24 +3,31 @@
 
 from __future__ import annotations
 
-from typing import Dict, Optional
+from typing import Annotated, Dict, Optional
 
 from pydantic import BaseModel, Field
 
-from .. import type_schema
-from ..materials import compilation_schema
-from ..pointer import template_schema
+from ..materials.compilation_schema import MaterialsCompilation
+from ..pointer.template_schema import PointerTemplate
+from ..type_schema import Type
 
 
-class EthdebugFormatInfoResources(BaseModel):
-    types: Dict[str, type_schema.EthdebugFormatType] = Field(
-        ...,
-        description='A collection of types by name identifier.\n',
-        title='Types by name',
-    )
-    pointers: Dict[str, template_schema.EthdebugFormatPointerTemplate] = Field(
-        ...,
-        description='A collection of pointer templates by name identifier.\n',
-        title='Pointer templates by name',
-    )
-    compilation: Optional[compilation_schema.EthdebugFormatMaterialsCompilation] = None
+class InfoResources(BaseModel):
+    types: Annotated[
+        Dict[str, Type],
+        Field(
+            description='A collection of types by name identifier.\n',
+            title='Types by name',
+        ),
+    ]
+    pointers: Annotated[
+        Dict[str, PointerTemplate],
+        Field(
+            description='A collection of pointer templates by name identifier.\n',
+            title='Pointer templates by name',
+        ),
+    ]
+    compilation: Optional[MaterialsCompilation] = None
+
+
+InfoResources.model_rebuild()

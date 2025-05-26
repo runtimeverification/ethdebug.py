@@ -4,150 +4,160 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Dict, List, Optional, Union
+from typing import Annotated, Dict, List, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, Field, RootModel, constr
+from pydantic import BaseModel, ConfigDict, Field, RootModel
 
-from ..data import value_schema
-from . import identifier_schema
+from ..data.value_schema import DataValue
+from .identifier_schema import PointerIdentifier
 
 
 class Constant(Enum):
     field_wordsize = '$wordsize'
 
 
-class Literal(RootModel[value_schema.EthdebugFormatDataValue]):
-    root: value_schema.EthdebugFormatDataValue = Field(
-        ...,
-        description='An unsigned number or a `0x`-prefixed string of hexadecimal digits\n',
-        examples=[
-            5,
-            '0x0000000000000000000000000000000000000000000000000000000000000000',
-        ],
-        title='Literal value',
-    )
+class Literal(RootModel[DataValue]):
+    root: Annotated[
+        DataValue,
+        Field(
+            description='An unsigned number or a `0x`-prefixed string of hexadecimal digits\n',
+            examples=[
+                5,
+                '0x0000000000000000000000000000000000000000000000000000000000000000',
+            ],
+            title='Literal value',
+        ),
+    ]
 
 
-class Variable(RootModel[identifier_schema.EthdebugFormatPointerIdentifier]):
-    root: identifier_schema.EthdebugFormatPointerIdentifier = Field(
-        ...,
-        description='A string that matches an identifier used in an earlier declaration of\na scalar variable. This expression evaluates to the value of that\nvariable.\n',
-        title='Variable identifier',
-    )
+class Variable(RootModel[PointerIdentifier]):
+    root: Annotated[
+        PointerIdentifier,
+        Field(
+            description='A string that matches an identifier used in an earlier declaration of\na scalar variable. This expression evaluates to the value of that\nvariable.\n',
+            title='Variable identifier',
+        ),
+    ]
 
 
-class Reference(
-    RootModel[Union[identifier_schema.EthdebugFormatPointerIdentifier, str]]
-):
-    root: Union[identifier_schema.EthdebugFormatPointerIdentifier, str] = Field(
-        ...,
-        description='A string value that **must** either be the `"name"` of at least one\nregion declared with `{ "name": "<region>" }` previously in some root\npointer representation, or it **must** be the literal value `"$this"`,\nwhich indicates a reference to the region containing this expression.\n\nIf more than one region is defined with the same name, resolution is\ndefined as firstly resolving to the latest earlier sibling that declares\nthe matching name, then secondly resolving to the parent if it matches,\nthen to parent\'s earlier siblings, and so on.\n',
-        title='Region reference',
-    )
+class Reference(RootModel[Union[PointerIdentifier, str]]):
+    root: Annotated[
+        Union[PointerIdentifier, str],
+        Field(
+            description='A string value that **must** either be the `"name"` of at least one\nregion declared with `{ "name": "<region>" }` previously in some root\npointer representation, or it **must** be the literal value `"$this"`,\nwhich indicates a reference to the region containing this expression.\n\nIf more than one region is defined with the same name, resolution is\ndefined as firstly resolving to the latest earlier sibling that declares\nthe matching name, then secondly resolving to the parent if it matches,\nthen to parent\'s earlier siblings, and so on.\n',
+            title='Region reference',
+        ),
+    ]
 
 
-class Lookup(RootModel[Dict[constr(pattern=r'^\.(offset|length|slot)$'), Reference]]):
-    root: Dict[constr(pattern=r'^\.(offset|length|slot)$'), Reference] = Field(
-        ...,
-        description='An object of the form `{ ".<property-name>": "<region>" }`, to\ndenote that this expression is equivalent to the defined value for\nthe property named `<property-name>` inside the region referenced as\n`<region>`.\n\n`<property-name>` **must** be a valid and present property on the\ncorresponding region, or it **must** correspond to an optional property\nwhose schema specifies a default value for that property.\n',
-        examples=[
-            {'.offset': 'array-count'},
-            {'.length': 'array-item'},
-            {'.offset': '$this'},
-        ],
-        title='Lookup region definition',
-    )
+class Lookup(RootModel[Dict[str, Reference]]):
+    root: Annotated[
+        Dict[str, Reference],
+        Field(
+            description='An object of the form `{ ".<property-name>": "<region>" }`, to\ndenote that this expression is equivalent to the defined value for\nthe property named `<property-name>` inside the region referenced as\n`<region>`.\n\n`<property-name>` **must** be a valid and present property on the\ncorresponding region, or it **must** correspond to an optional property\nwhose schema specifies a default value for that property.\n',
+            examples=[
+                {'.offset': 'array-count'},
+                {'.length': 'array-item'},
+                {'.offset': '$this'},
+            ],
+            title='Lookup region definition',
+        ),
+    ]
 
 
 class Read(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
-    field_read: Reference = Field(..., alias='$read')
+    field_read: Annotated[Reference, Field(alias='$read')]
 
 
-class EthdebugFormatPointerExpression(
+class PointerExpression(
     RootModel[
-        Union[Literal, Variable, Constant, Arithmetic, Lookup, Read, Keccak256, Resize]
+        Union[Literal, Variable, Constant, 'Arithmetic', Lookup, Read, 'Keccak256', 'Resize']
     ]
 ):
-    root: Union[
-        Literal, Variable, Constant, Arithmetic, Lookup, Read, Keccak256, Resize
-    ] = Field(
-        ...,
-        description='A schema for describing expressions that evaluate to values.\n',
-        examples=[
-            0,
-            {'$sum': [{'.offset': 'array-start'}, {'.length': 'array-start'}, 1]},
-            {'$keccak256': [5, {'.offset': 'array-start'}]},
-        ],
-        title='ethdebug/format/pointer/expression',
-    )
+    root: Annotated[
+        Union[Literal, Variable, Constant, Arithmetic, Lookup, Read, Keccak256, Resize],
+        Field(
+            description='A schema for describing expressions that evaluate to values.\n',
+            examples=[
+                0,
+                {'$sum': [{'.offset': 'array-start'}, {'.length': 'array-start'}, 1]},
+                {'$keccak256': [5, {'.offset': 'array-start'}]},
+            ],
+            title='ethdebug/format/pointer/expression',
+        ),
+    ]
 
 
 class Arithmetic(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
-    field_sum: Optional[Operands] = Field(
-        None, alias='$sum', description='A list of expressions to be added together.\n'
-    )
-    field_difference: Optional[Operands] = Field(
-        None,
-        alias='$difference',
-        description='A tuple of two expressions where the second is to be subtracted from\nthe first.\n\nIf the second operand is larger than the first, the result of this\narithmetic operation is defined to equal zero (`0`).\n\n(i.e., `{ "$difference": [a, b] }` equals `a` minus `b`.)\n',
-    )
-    field_product: Optional[Operands] = Field(
-        None, alias='$product', description='A list of expressions to be multiplied.\n'
-    )
-    field_quotient: Optional[Operands] = Field(
-        None,
-        alias='$quotient',
-        description='A tuple of two expressions where the first corresponds to the\ndividend and the second corresponds to the divisor, for the purposes\nof doing integer division.\n\n(i.e., `{ "$quotient": [a, b] }` equals `a` divided by `b`.)\n',
-    )
-    field_remainder: Optional[Operands] = Field(
-        None,
-        alias='$remainder',
-        description='A tuple of two expressions where the first corresponds to the\ndividend and the second corresponds to the divisor, for the purposes\nof computing the modular-arithmetic remainder.\n\n(i.e., `{ "$remainder": [a, b] }` equals `a` mod `b`.)\n',
-    )
+    field_sum: Annotated[
+        Optional[Operands],
+        Field(
+            alias='$sum', description='A list of expressions to be added together.\n'
+        ),
+    ] = None
+    field_difference: Annotated[
+        Optional[Operands],
+        Field(
+            alias='$difference',
+            description='A tuple of two expressions where the second is to be subtracted from\nthe first.\n\nIf the second operand is larger than the first, the result of this\narithmetic operation is defined to equal zero (`0`).\n\n(i.e., `{ "$difference": [a, b] }` equals `a` minus `b`.)\n',
+        ),
+    ] = None
+    field_product: Annotated[
+        Optional[Operands],
+        Field(
+            alias='$product', description='A list of expressions to be multiplied.\n'
+        ),
+    ] = None
+    field_quotient: Annotated[
+        Optional[Operands],
+        Field(
+            alias='$quotient',
+            description='A tuple of two expressions where the first corresponds to the\ndividend and the second corresponds to the divisor, for the purposes\nof doing integer division.\n\n(i.e., `{ "$quotient": [a, b] }` equals `a` divided by `b`.)\n',
+        ),
+    ] = None
+    field_remainder: Annotated[
+        Optional[Operands],
+        Field(
+            alias='$remainder',
+            description='A tuple of two expressions where the first corresponds to the\ndividend and the second corresponds to the divisor, for the purposes\nof computing the modular-arithmetic remainder.\n\n(i.e., `{ "$remainder": [a, b] }` equals `a` mod `b`.)\n',
+        ),
+    ] = None
 
 
-class Operands(RootModel[List[EthdebugFormatPointerExpression]]):
-    root: List[EthdebugFormatPointerExpression]
+class Operands(RootModel[List[PointerExpression]]):
+    root: List[PointerExpression]
 
 
 class Keccak256(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
-    field_keccak256: List[EthdebugFormatPointerExpression] = Field(
-        ..., alias='$keccak256', title='Array of hashed values'
-    )
-
-
-class Resize(
-    RootModel[
-        Union[
-            Dict[
-                constr(pattern=r'^\$sized([1-9]+[0-9]*)$'),
-                EthdebugFormatPointerExpression,
-            ],
-            Dict[constr(pattern=r'^\$wordsized$'), EthdebugFormatPointerExpression],
-        ]
+    field_keccak256: Annotated[
+        List[PointerExpression],
+        Field(alias='$keccak256', title='Array of hashed values'),
     ]
-):
-    root: Union[
-        Dict[
-            constr(pattern=r'^\$sized([1-9]+[0-9]*)$'), EthdebugFormatPointerExpression
-        ],
-        Dict[constr(pattern=r'^\$wordsized$'), EthdebugFormatPointerExpression],
-    ] = Field(
-        ...,
-        description='A resize operation expression is either an object of the form\n`{ "$sized<N>": <expression> }` or an object of the form\n`{ "$wordsized": <expression> }`, where `<expression>` is an expression\nwhose value is to be resized, and, if applicable, where `<N>` is the\nsmallest decimal representation of an unsigned integer.\n\nThis object\'s value is evaluated as follows, based on the bytes width of\nthe value `<expression>` evaluates to and based on `<N>` (using the\nvalue of `"$wordsize"` for `<N>` in the case of the latter form above):\n- If the width equals `<N>`, this object evaluates to the same value as\n  `<expression>` (equivalent to the identity function or no-op).\n- If the width is less than `<N>`, this object evaluates to the same value\n  as `<expression>` but with additional zero-bytes (`0x00`) prepended on\n  the left (most significant) side, such that the resulting bytes width\n  equals `<N>`.\n- If the width exceeds `<N>`, this object evaluates to the same value\n  as `<expression>` but with a number of bytes removed from the left\n  (most significant) side until the bytes width equals `<N>`.\n\n(These cases match the behavior that Solidity uses for resizing its\n`bytesN`/`uintN` types.)\n',
-        examples=[{'$sized2': '0x00'}, {'$sized2': '0xffffff'}, {'$wordsized': '0x00'}],
-        title='Resize data',
-    )
 
 
-EthdebugFormatPointerExpression.model_rebuild()
+class Resize(RootModel[Dict[str, PointerExpression]]):
+    root: Annotated[
+        Dict[str, PointerExpression],
+        Field(
+            description='A resize operation expression is either an object of the form\n`{ "$sized<N>": <expression> }` or an object of the form\n`{ "$wordsized": <expression> }`, where `<expression>` is an expression\nwhose value is to be resized, and, if applicable, where `<N>` is the\nsmallest decimal representation of an unsigned integer.\n\nThis object\'s value is evaluated as follows, based on the bytes width of\nthe value `<expression>` evaluates to and based on `<N>` (using the\nvalue of `"$wordsize"` for `<N>` in the case of the latter form above):\n- If the width equals `<N>`, this object evaluates to the same value as\n  `<expression>` (equivalent to the identity function or no-op).\n- If the width is less than `<N>`, this object evaluates to the same value\n  as `<expression>` but with additional zero-bytes (`0x00`) prepended on\n  the left (most significant) side, such that the resulting bytes width\n  equals `<N>`.\n- If the width exceeds `<N>`, this object evaluates to the same value\n  as `<expression>` but with a number of bytes removed from the left\n  (most significant) side until the bytes width equals `<N>`.\n\n(These cases match the behavior that Solidity uses for resizing its\n`bytesN`/`uintN` types.)\n',
+            examples=[
+                {'$sized2': '0x00'},
+                {'$sized2': '0xffffff'},
+                {'$wordsized': '0x00'},
+            ],
+            title='Resize data',
+        ),
+    ]
+
+
+PointerExpression.model_rebuild()
 Arithmetic.model_rebuild()

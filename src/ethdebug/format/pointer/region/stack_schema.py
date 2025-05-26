@@ -5,11 +5,9 @@ from __future__ import annotations
 
 from typing import Literal
 
-from ..scheme.segment_schema import EthdebugFormatPointerSchemeSegment
-from .base_schema import EthdebugFormatPointerRegionBase
+from ..scheme.segment_schema import PointerSchemeSegment
+from .base_schema import PointerRegionBase
 
 
-class EthdebugFormatPointerRegionStack(
-    EthdebugFormatPointerRegionBase, EthdebugFormatPointerSchemeSegment
-):
+class PointerRegionStack(PointerRegionBase, PointerSchemeSegment):
     location: Literal['stack']

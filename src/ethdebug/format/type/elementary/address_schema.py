@@ -3,15 +3,17 @@
 
 from __future__ import annotations
 
-from typing import Literal, Optional
+from typing import Annotated, Literal, Optional
 
 from pydantic import BaseModel, Field
 
 
-class EthdebugFormatTypeElementaryAddress(BaseModel):
-    class_: Literal['elementary'] = Field('elementary', alias='class')
+class TypeElementaryAddress(BaseModel):
+    class_: Annotated[Literal['elementary'], Field(alias='class')] = 'elementary'
     kind: Literal['address']
-    payable: Optional[bool] = Field(
-        None,
-        description='If this field is omitted, this type represents an address whose payability is not known.',
-    )
+    payable: Annotated[
+        Optional[bool],
+        Field(
+            description='If this field is omitted, this type represents an address whose payability is not known.'
+        ),
+    ] = None

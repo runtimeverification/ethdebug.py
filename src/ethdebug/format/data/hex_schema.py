@@ -3,13 +3,18 @@
 
 from __future__ import annotations
 
-from pydantic import Field, RootModel, constr
+from typing import Annotated
+
+from pydantic import Field, RootModel
 
 
-class EthdebugFormatDataHex(RootModel[constr(pattern=r'^0x[0-9a-fA-F]{1,}$')]):
-    root: constr(pattern=r'^0x[0-9a-fA-F]{1,}$') = Field(
-        ...,
-        description='A `0x`-prefixed hexadecimal string. This value **must** contain at least one\nhexadecimal character (`0x` by itself is not allowed).\n',
-        examples=['0x0000', '0x1'],
-        title='ethdebug/format/data/hex',
-    )
+class DataHex(RootModel[str]):
+    root: Annotated[
+        str,
+        Field(
+            description='A `0x`-prefixed hexadecimal string. This value **must** contain at least one\nhexadecimal character (`0x` by itself is not allowed).\n',
+            examples=['0x0000', '0x1'],
+            pattern='^0x[0-9a-fA-F]{1,}$',
+            title='ethdebug/format/data/hex',
+        ),
+    ]

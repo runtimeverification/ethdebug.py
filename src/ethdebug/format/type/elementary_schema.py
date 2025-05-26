@@ -21,5 +21,5 @@ class Kind(Enum):
     enum = 'enum'
 
 
-class EthdebugFormatTypeElementary(BaseModel):
+class TypeElementary(BaseModel):
     kind: Kind

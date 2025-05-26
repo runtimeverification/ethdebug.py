@@ -3,18 +3,20 @@
 
 from __future__ import annotations
 
-from typing import List, Literal, Optional
+from typing import Annotated, List, Literal, Optional
 
 from pydantic import BaseModel, Field
 
-from .. import definition_schema
+from ..definition_schema import TypeDefinition
 
 
-class EthdebugFormatTypeElementaryEnum(BaseModel):
-    class_: Literal['elementary'] = Field('elementary', alias='class')
+class TypeElementaryEnum(BaseModel):
+    class_: Annotated[Literal['elementary'], Field(alias='class')] = 'elementary'
     kind: Literal['enum']
-    values: List = Field(
-        ...,
-        description='The allowed values of an enum. This format makes no restriction on which values are allowed here.',
-    )
-    definition: Optional[definition_schema.EthdebugFormatTypeDefinition] = None
+    values: Annotated[
+        List,
+        Field(
+            description='The allowed values of an enum. This format makes no restriction on which values are allowed here.'
+        ),
+    ]
+    definition: Optional[TypeDefinition] = None

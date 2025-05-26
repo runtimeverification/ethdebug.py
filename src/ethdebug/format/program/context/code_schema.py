@@ -5,8 +5,8 @@ from __future__ import annotations
 
 from pydantic import BaseModel
 
-from ...materials import source_range_schema
+from ...materials.source_range_schema import MaterialsSourceRange
 
 
-class EthdebugFormatProgramContextCode(BaseModel):
-    code: source_range_schema.EthdebugFormatMaterialsSourceRange
+class ProgramContextCode(BaseModel):
+    code: MaterialsSourceRange

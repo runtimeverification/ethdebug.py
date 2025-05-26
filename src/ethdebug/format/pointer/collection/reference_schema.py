@@ -3,15 +3,15 @@
 
 from __future__ import annotations
 
+from typing import Annotated
+
 from pydantic import BaseModel, ConfigDict, Field
 
-from .. import identifier_schema
+from ..identifier_schema import PointerIdentifier
 
 
-class EthdebugFormatPointerCollectionReference(BaseModel):
+class PointerCollectionReference(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
-    template: identifier_schema.EthdebugFormatPointerIdentifier = Field(
-        ..., title='Template identifier'
-    )
+    template: Annotated[PointerIdentifier, Field(title='Template identifier')]

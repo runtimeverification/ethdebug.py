@@ -3,15 +3,18 @@
 
 from __future__ import annotations
 
-from typing import List
+from typing import Annotated, List
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from ... import pointer_schema
+from ...pointer_schema import Pointer
 
 
-class EthdebugFormatPointerCollectionGroup(BaseModel):
+class PointerCollectionGroup(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
-    group: List[pointer_schema.EthdebugFormatPointer] = Field(..., min_length=1)
+    group: Annotated[List[Pointer], Field(min_length=1)]
+
+
+PointerCollectionGroup.model_rebuild()

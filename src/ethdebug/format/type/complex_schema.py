@@ -17,5 +17,5 @@ class Kind(Enum):
     function = 'function'
 
 
-class EthdebugFormatTypeComplex(BaseModel):
+class TypeComplex(BaseModel):
     kind: Kind

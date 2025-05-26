@@ -3,139 +3,146 @@
 
 from __future__ import annotations
 
-from typing import Literal, Optional, Union
+from typing import Annotated, Literal, Optional, Union
 
 from pydantic import BaseModel, Field, RootModel
 
-from .. import definition_schema, wrapper_schema
-from ..elementary import contract_schema
-from ..wrapper_schema import EthdebugFormatTypeWrapper
-from . import tuple_schema
+from ..definition_schema import TypeDefinition
+from ..elementary.contract_schema import TypeElementaryContract
+from ..wrapper_schema import TypeWrapper as TypeWrapper_1
+from .tuple_schema import TypeComplexTuple
 
 
-class Contract(EthdebugFormatTypeWrapper):
-    type: Optional[contract_schema.EthdebugFormatTypeElementaryContract] = None
+class Contract(TypeWrapper):
+    type: Optional[TypeElementaryContract] = None
 
 
-class Parameters(EthdebugFormatTypeWrapper):
-    type: Optional[tuple_schema.EthdebugFormatTypeComplexTuple] = None
+class Parameters(TypeWrapper):
+    type: Optional[TypeComplexTuple] = None
 
 
 class Contains(BaseModel):
     parameters: Parameters
-    returns: Optional[Union[wrapper_schema.EthdebugFormatTypeWrapper, Parameters]] = (
+    returns: Annotated[
+        Optional[Union[TypeWrapper_1, Parameters]],
         Field(
-            None,
             description='To accommodate languages differing in whether functions return single\nvalues or lists of values, this field may be either a generic type\nwrapper or explicitly defined as a type wrapper around a tuple type.\n\nDebuggers that implement this schema **should** be aware that\nlanguages whose functions return sole values might return tuple\ntypes. Resolving this ambiguity remains outside the scope of the\nschema (but compilers **must** be consistent when representing\nfunction types in this schema).\n',
             title='Return type (or tuple of types)',
-        )
-    )
-    contract: Optional[Contract] = Field(
-        None,
-        description='A wrapper around the contract type that composes this external function type.',
-        title='Contract type providing external function',
-    )
+        ),
+    ] = None
+    contract: Annotated[
+        Optional[Contract],
+        Field(
+            description='A wrapper around the contract type that composes this external function type.',
+            title='Contract type providing external function',
+        ),
+    ] = None
 
 
-class EthdebugFormatTypeComplexFunction1(BaseModel):
-    class_: Literal['complex'] = Field('complex', alias='class')
+class Type_Complex_Function(BaseModel):
+    class_: Annotated[Literal['complex'], Field(alias='class')] = 'complex'
     kind: Literal['function'] = 'function'
-    contains: Optional[Contains] = Field(
-        None,
-        description="Types this function type composes. Function types inherently compose\ntwo groupings of types (an ordered list of parameter types and typically\neither a return value or return parameters). Function types' `contains`\nfield is organized as a mapping of `parameters` types (a type wrapper for\na tuple type) and an optional `returns` type (either a generic type\nwrapper or a type wrapper for a tuple type).\n\nThis definition applies for both cases (internal and external function\ntypes). Each of those specific types may expand this `contains` field\nschema with other semantic details (such as an external function type\nindicating the contract type from which it is exposed).\n",
-        title='Additional contents',
-    )
-    definition: Optional[definition_schema.EthdebugFormatTypeDefinition] = None
+    contains: Annotated[
+        Optional[Contains],
+        Field(
+            description="Types this function type composes. Function types inherently compose\ntwo groupings of types (an ordered list of parameter types and typically\neither a return value or return parameters). Function types' `contains`\nfield is organized as a mapping of `parameters` types (a type wrapper for\na tuple type) and an optional `returns` type (either a generic type\nwrapper or a type wrapper for a tuple type).\n\nThis definition applies for both cases (internal and external function\ntypes). Each of those specific types may expand this `contains` field\nschema with other semantic details (such as an external function type\nindicating the contract type from which it is exposed).\n",
+            title='Additional contents',
+        ),
+    ] = None
+    definition: Optional[TypeDefinition] = None
     internal: Literal[False] = False
     external: Literal[True]
 
 
 class Contains1(BaseModel):
     parameters: Parameters
-    returns: Optional[Union[wrapper_schema.EthdebugFormatTypeWrapper, Parameters]] = (
+    returns: Annotated[
+        Optional[Union[TypeWrapper_1, Parameters]],
         Field(
-            None,
             description='To accommodate languages differing in whether functions return single\nvalues or lists of values, this field may be either a generic type\nwrapper or explicitly defined as a type wrapper around a tuple type.\n\nDebuggers that implement this schema **should** be aware that\nlanguages whose functions return sole values might return tuple\ntypes. Resolving this ambiguity remains outside the scope of the\nschema (but compilers **must** be consistent when representing\nfunction types in this schema).\n',
             title='Return type (or tuple of types)',
-        )
-    )
+        ),
+    ] = None
 
 
-class EthdebugFormatTypeComplexFunction2(BaseModel):
-    class_: Literal['complex'] = Field('complex', alias='class')
+class TypeComplexFunction2(BaseModel):
+    class_: Annotated[Literal['complex'], Field(alias='class')] = 'complex'
     kind: Literal['function'] = 'function'
-    contains: Optional[Contains1] = Field(
-        None,
-        description="Types this function type composes. Function types inherently compose\ntwo groupings of types (an ordered list of parameter types and typically\neither a return value or return parameters). Function types' `contains`\nfield is organized as a mapping of `parameters` types (a type wrapper for\na tuple type) and an optional `returns` type (either a generic type\nwrapper or a type wrapper for a tuple type).\n\nThis definition applies for both cases (internal and external function\ntypes). Each of those specific types may expand this `contains` field\nschema with other semantic details (such as an external function type\nindicating the contract type from which it is exposed).\n",
-        title='Parameter and return types',
-    )
-    definition: Optional[definition_schema.EthdebugFormatTypeDefinition] = None
+    contains: Annotated[
+        Optional[Contains1],
+        Field(
+            description="Types this function type composes. Function types inherently compose\ntwo groupings of types (an ordered list of parameter types and typically\neither a return value or return parameters). Function types' `contains`\nfield is organized as a mapping of `parameters` types (a type wrapper for\na tuple type) and an optional `returns` type (either a generic type\nwrapper or a type wrapper for a tuple type).\n\nThis definition applies for both cases (internal and external function\ntypes). Each of those specific types may expand this `contains` field\nschema with other semantic details (such as an external function type\nindicating the contract type from which it is exposed).\n",
+            title='Parameter and return types',
+        ),
+    ] = None
+    definition: Optional[TypeDefinition] = None
     internal: Literal[True]
     external: Literal[False] = False
 
 
-class EthdebugFormatTypeComplexFunction(
-    RootModel[
-        Union[EthdebugFormatTypeComplexFunction1, EthdebugFormatTypeComplexFunction2]
-    ]
+class TypeComplexFunction(
+    RootModel[Union[Type_Complex_Function, TypeComplexFunction2]]
 ):
-    root: Union[
-        EthdebugFormatTypeComplexFunction1, EthdebugFormatTypeComplexFunction2
-    ] = Field(
-        ...,
-        description='Schema for representing a function type.\n\nType representations must indicate whether they represent a function that is\ncalled internally (within the semantics of the language) or a function that\nis called externally (via EVM contract call semantics and the Solidity ABI).\nInternal function types require the `"internal": true` field; external\nfunction types require `"external": true`.\n\nNote that external function types may include a representation of the\ncontract type that defines or provides this function as an external\ninterface.\n',
-        examples=[
-            {
-                'kind': 'function',
-                'internal': True,
-                'definition': {'name': 'increment'},
-                'contains': {
-                    'parameters': {
-                        'type': {
-                            'kind': 'tuple',
-                            'contains': [
-                                {'name': 'value', 'type': {'kind': 'uint', 'bits': 256}}
-                            ],
-                        }
+    root: Annotated[
+        Union[Type_Complex_Function, TypeComplexFunction2],
+        Field(
+            description='Schema for representing a function type.\n\nType representations must indicate whether they represent a function that is\ncalled internally (within the semantics of the language) or a function that\nis called externally (via EVM contract call semantics and the Solidity ABI).\nInternal function types require the `"internal": true` field; external\nfunction types require `"external": true`.\n\nNote that external function types may include a representation of the\ncontract type that defines or provides this function as an external\ninterface.\n',
+            examples=[
+                {
+                    'kind': 'function',
+                    'internal': True,
+                    'definition': {'name': 'increment'},
+                    'contains': {
+                        'parameters': {
+                            'type': {
+                                'kind': 'tuple',
+                                'contains': [
+                                    {
+                                        'name': 'value',
+                                        'type': {'kind': 'uint', 'bits': 256},
+                                    }
+                                ],
+                            }
+                        },
+                        'returns': {'type': {'kind': 'uint', 'bits': 256}},
                     },
-                    'returns': {'type': {'kind': 'uint', 'bits': 256}},
                 },
-            },
-            {
-                'kind': 'function',
-                'external': True,
-                'definition': {'name': 'withdraw'},
-                'contains': {
-                    'contract': {
-                        'type': {
-                            'kind': 'contract',
-                            'payable': True,
-                            'interface': True,
-                            'definition': {'name': 'Bank'},
-                        }
-                    },
-                    'parameters': {
-                        'type': {
-                            'kind': 'tuple',
-                            'contains': [
-                                {
-                                    'name': 'beneficiary',
-                                    'type': {'kind': 'address', 'payable': True},
-                                },
-                                {
-                                    'name': 'amount',
-                                    'type': {
-                                        'kind': 'ufixed',
-                                        'bits': 128,
-                                        'places': 18,
+                {
+                    'kind': 'function',
+                    'external': True,
+                    'definition': {'name': 'withdraw'},
+                    'contains': {
+                        'contract': {
+                            'type': {
+                                'kind': 'contract',
+                                'payable': True,
+                                'interface': True,
+                                'definition': {'name': 'Bank'},
+                            }
+                        },
+                        'parameters': {
+                            'type': {
+                                'kind': 'tuple',
+                                'contains': [
+                                    {
+                                        'name': 'beneficiary',
+                                        'type': {'kind': 'address', 'payable': True},
                                     },
-                                },
-                            ],
-                        }
+                                    {
+                                        'name': 'amount',
+                                        'type': {
+                                            'kind': 'ufixed',
+                                            'bits': 128,
+                                            'places': 18,
+                                        },
+                                    },
+                                ],
+                            }
+                        },
+                        'returns': {'type': {'kind': 'tuple', 'contains': []}},
                     },
-                    'returns': {'type': {'kind': 'tuple', 'contains': []}},
                 },
-            },
-        ],
-        title='ethdebug/format/type/complex/function',
-    )
+            ],
+            title='ethdebug/format/type/complex/function',
+        ),
+    ]

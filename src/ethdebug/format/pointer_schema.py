@@ -3,8 +3,302 @@
 
 from __future__ import annotations
 
-from pydantic import BaseModel
+from typing import Annotated, Union
+
+from pydantic import Field, RootModel
+
+from .pointer.collection_schema import PointerCollection
+from .pointer.region_schema import PointerRegion
 
 
-class EthdebugFormatPointer(BaseModel):
-    pass
+class Pointer(RootModel[Union[PointerRegion, PointerCollection]]):
+    root: Annotated[
+        Union[PointerRegion, PointerCollection],
+        Field(
+            description='A schema for representing a pointer to a data position or a range of data\npositions in the EVM.\n\nAn **ethdebug/format/pointer** is either a single region or a structured\ncollection of other pointers.\n',
+            examples=[
+                {'location': 'storage', 'slot': 2},
+                {
+                    'define': {'uint256-array-memory-pointer-slot': 0},
+                    'in': {
+                        'group': [
+                            {
+                                'name': 'array-start',
+                                'location': 'stack',
+                                'slot': 'uint256-array-memory-pointer-slot',
+                            },
+                            {
+                                'name': 'array-count',
+                                'location': 'memory',
+                                'offset': {'$read': 'array-start'},
+                                'length': '$wordsize',
+                            },
+                            {
+                                'list': {
+                                    'count': {'$read': 'array-count'},
+                                    'each': 'item-index',
+                                    'is': {
+                                        'name': 'array-item',
+                                        'location': 'memory',
+                                        'offset': {
+                                            '$sum': [
+                                                {'.offset': 'array-count'},
+                                                {'.length': 'array-count'},
+                                                {
+                                                    '$product': [
+                                                        'item-index',
+                                                        {'.length': '$this'},
+                                                    ]
+                                                },
+                                            ]
+                                        },
+                                        'length': '$wordsize',
+                                    },
+                                }
+                            },
+                        ]
+                    },
+                },
+                {
+                    'define': {'struct-storage-contract-variable-slot': 0},
+                    'in': {
+                        'group': [
+                            {
+                                'name': 'x',
+                                'location': 'storage',
+                                'slot': 'struct-storage-contract-variable-slot',
+                                'offset': {
+                                    '$difference': ['$wordsize', {'.length': '$this'}]
+                                },
+                                'length': 1,
+                            },
+                            {
+                                'name': 'y',
+                                'location': 'storage',
+                                'slot': 'struct-storage-contract-variable-slot',
+                                'offset': {
+                                    '$difference': [
+                                        {'.offset': 'x'},
+                                        {'.length': '$this'},
+                                    ]
+                                },
+                                'length': 1,
+                            },
+                            {
+                                'name': 'salt',
+                                'location': 'storage',
+                                'slot': 'struct-storage-contract-variable-slot',
+                                'offset': {
+                                    '$difference': [
+                                        {'.offset': 'y'},
+                                        {'.length': '$this'},
+                                    ]
+                                },
+                                'length': 4,
+                            },
+                        ]
+                    },
+                },
+                {
+                    'group': [
+                        {'name': 'array-start', 'location': 'stack', 'slot': 0},
+                        {
+                            'name': 'array-count',
+                            'location': 'memory',
+                            'offset': {'$read': 'array-start'},
+                            'length': '$wordsize',
+                        },
+                        {
+                            'list': {
+                                'count': {'$read': 'array-count'},
+                                'each': 'item-index',
+                                'is': {
+                                    'group': [
+                                        {
+                                            'name': 'struct-pointer',
+                                            'location': 'memory',
+                                            'offset': {
+                                                '$sum': [
+                                                    {'.offset': 'array-count'},
+                                                    {'.length': 'array-count'},
+                                                    {
+                                                        '$product': [
+                                                            'item-index',
+                                                            {
+                                                                '.length': 'struct-pointer'
+                                                            },
+                                                        ]
+                                                    },
+                                                ]
+                                            },
+                                            'length': '$wordsize',
+                                        },
+                                        {
+                                            'name': 'struct-member-0',
+                                            'location': 'memory',
+                                            'offset': {'$read': 'struct-pointer'},
+                                            'length': '$wordsize',
+                                        },
+                                        {
+                                            'name': 'struct-member-1',
+                                            'location': 'memory',
+                                            'offset': {
+                                                '$sum': [
+                                                    {'.offset': 'struct-member-0'},
+                                                    {'.length': 'struct-member-0'},
+                                                ]
+                                            },
+                                            'length': '$wordsize',
+                                        },
+                                    ]
+                                },
+                            }
+                        },
+                    ]
+                },
+                {
+                    'define': {'string-storage-contract-variable-slot': 0},
+                    'in': {
+                        'group': [
+                            {
+                                'name': 'length-flag',
+                                'location': 'storage',
+                                'slot': 'string-storage-contract-variable-slot',
+                                'offset': {'$difference': ['$wordsize', 1]},
+                                'length': 1,
+                            },
+                            {
+                                'if': {
+                                    '$remainder': [
+                                        {'$sum': [{'$read': 'length-flag'}, 1]},
+                                        2,
+                                    ]
+                                },
+                                'then': {
+                                    'define': {
+                                        'string-length': {
+                                            '$quotient': [{'$read': 'length-flag'}, 2]
+                                        }
+                                    },
+                                    'in': {
+                                        'name': 'string',
+                                        'location': 'storage',
+                                        'slot': 'string-storage-contract-variable-slot',
+                                        'offset': 0,
+                                        'length': 'string-length',
+                                    },
+                                },
+                                'else': {
+                                    'group': [
+                                        {
+                                            'name': 'long-string-length-data',
+                                            'location': 'storage',
+                                            'slot': 'string-storage-contract-variable-slot',
+                                            'offset': 0,
+                                            'length': '$wordsize',
+                                        },
+                                        {
+                                            'define': {
+                                                'string-length': {
+                                                    '$quotient': [
+                                                        {
+                                                            '$difference': [
+                                                                {
+                                                                    '$read': 'long-string-length-data'
+                                                                },
+                                                                1,
+                                                            ]
+                                                        },
+                                                        2,
+                                                    ]
+                                                },
+                                                'start-slot': {
+                                                    '$keccak256': [
+                                                        {
+                                                            '$wordsized': 'string-storage-contract-variable-slot'
+                                                        }
+                                                    ]
+                                                },
+                                                'total-slots': {
+                                                    '$quotient': [
+                                                        {
+                                                            '$sum': [
+                                                                'string-length',
+                                                                {
+                                                                    '$difference': [
+                                                                        '$wordsize',
+                                                                        1,
+                                                                    ]
+                                                                },
+                                                            ]
+                                                        },
+                                                        '$wordsize',
+                                                    ]
+                                                },
+                                            },
+                                            'in': {
+                                                'list': {
+                                                    'count': 'total-slots',
+                                                    'each': 'i',
+                                                    'is': {
+                                                        'define': {
+                                                            'current-slot': {
+                                                                '$sum': [
+                                                                    'start-slot',
+                                                                    'i',
+                                                                ]
+                                                            },
+                                                            'previous-length': {
+                                                                '$product': [
+                                                                    'i',
+                                                                    '$wordsize',
+                                                                ]
+                                                            },
+                                                        },
+                                                        'in': {
+                                                            'if': {
+                                                                '$difference': [
+                                                                    'string-length',
+                                                                    {
+                                                                        '$sum': [
+                                                                            'previous-length',
+                                                                            '$wordsize',
+                                                                        ]
+                                                                    },
+                                                                ]
+                                                            },
+                                                            'then': {
+                                                                'name': 'string',
+                                                                'location': 'storage',
+                                                                'slot': 'current-slot',
+                                                            },
+                                                            'else': {
+                                                                'name': 'string',
+                                                                'location': 'storage',
+                                                                'slot': 'current-slot',
+                                                                'offset': 0,
+                                                                'length': {
+                                                                    '$difference': [
+                                                                        'string-length',
+                                                                        'previous-length',
+                                                                    ]
+                                                                },
+                                                            },
+                                                        },
+                                                    },
+                                                }
+                                            },
+                                        },
+                                    ]
+                                },
+                            },
+                        ]
+                    },
+                },
+            ],
+            title='ethdebug/format/pointer',
+        ),
+    ]
+
+
+Pointer.model_rebuild()

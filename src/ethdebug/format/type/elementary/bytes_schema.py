@@ -3,17 +3,19 @@
 
 from __future__ import annotations
 
-from typing import Literal, Optional
+from typing import Annotated, Literal, Optional
 
 from pydantic import BaseModel, Field
 
-from ...data import unsigned_schema
+from ...data.unsigned_schema import DataUnsigned
 
 
-class EthdebugFormatTypeElementaryBytes(BaseModel):
-    class_: Literal['elementary'] = Field('elementary', alias='class')
+class TypeElementaryBytes(BaseModel):
+    class_: Annotated[Literal['elementary'], Field(alias='class')] = 'elementary'
     kind: Literal['bytes']
-    size: Optional[unsigned_schema.EthdebugFormatDataUnsigned] = Field(
-        None,
-        description='The number of bytes in the bytes string. If this field is omitted, this type is the dynamic bytes string type.',
-    )
+    size: Annotated[
+        Optional[DataUnsigned],
+        Field(
+            description='The number of bytes in the bytes string. If this field is omitted, this type is the dynamic bytes string type.'
+        ),
+    ] = None

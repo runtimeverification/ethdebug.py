@@ -3,42 +3,51 @@
 
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import Annotated, List, Optional
 
 from pydantic import BaseModel, Field
 
-from . import id_schema, source_schema
+from .id_schema import MaterialsId
+from .source_schema import MaterialsSource
 
 
 class Compiler(BaseModel):
-    name: str = Field(..., description='Compiler name')
-    version: str = Field(
-        ...,
-        description='Compiler version.\n\nThis value **should** be specified using the most detailed version\nrepresentation available, i.e., including source control hash and\ncompiler build information whenever possible.\n',
-    )
+    name: Annotated[str, Field(description='Compiler name')]
+    version: Annotated[
+        str,
+        Field(
+            description='Compiler version.\n\nThis value **should** be specified using the most detailed version\nrepresentation available, i.e., including source control hash and\ncompiler build information whenever possible.\n'
+        ),
+    ]
 
 
 class Settings(BaseModel):
     pass
 
 
-class EthdebugFormatMaterialsCompilation(BaseModel):
-    id: id_schema.EthdebugFormatMaterialsId = Field(
-        ...,
-        description='Compilation ID\n\nThis value **should** be globally-unique and generated only from the\ncompiler inputs (settings, sources, etc.); the same compiler inputs/\nsettings **should** produce the same identifier.\n',
-    )
-    compiler: Compiler = Field(
-        ...,
-        examples=[
-            {
-                'name': 'lllc',
-                'version': '0.4.12-develop.2017.6.27+commit.b83f77e0.Linux.g++',
-            }
-        ],
-        title='Compiler name and version',
-    )
-    settings: Optional[Settings] = Field(
-        None,
-        description='Compiler settings in a format native to the compiler.\n\nFor compilers whose settings includes full source representations, this\nfield **should** be specified in such a way that avoids large data\nredundancies (e.g. if compiler settings contain full source\nrepresentations, then this field would significantly duplicate the\ninformation represented by the `sources` field in this object).\n\nIn situations where settings information duplicates information\nrepresented elsewhere in **ethdebug/format**, compilers **may** adopt\nany reasonable strategy, e.g.:\n  - omit duplications partially (leaving the rest of the settings\n    intact)\n  - omit this field entirely\n  - specify this field as a hash of the full settings\n    representation (with the expectation that users of this format will\n    have access to the full representation by some other means)\n',
-    )
-    sources: List[source_schema.EthdebugFormatMaterialsSource]
+class MaterialsCompilation(BaseModel):
+    id: Annotated[
+        MaterialsId,
+        Field(
+            description='Compilation ID\n\nThis value **should** be globally-unique and generated only from the\ncompiler inputs (settings, sources, etc.); the same compiler inputs/\nsettings **should** produce the same identifier.\n'
+        ),
+    ]
+    compiler: Annotated[
+        Compiler,
+        Field(
+            examples=[
+                {
+                    'name': 'lllc',
+                    'version': '0.4.12-develop.2017.6.27+commit.b83f77e0.Linux.g++',
+                }
+            ],
+            title='Compiler name and version',
+        ),
+    ]
+    settings: Annotated[
+        Optional[Settings],
+        Field(
+            description='Compiler settings in a format native to the compiler.\n\nFor compilers whose settings includes full source representations, this\nfield **should** be specified in such a way that avoids large data\nredundancies (e.g. if compiler settings contain full source\nrepresentations, then this field would significantly duplicate the\ninformation represented by the `sources` field in this object).\n\nIn situations where settings information duplicates information\nrepresented elsewhere in **ethdebug/format**, compilers **may** adopt\nany reasonable strategy, e.g.:\n  - omit duplications partially (leaving the rest of the settings\n    intact)\n  - omit this field entirely\n  - specify this field as a hash of the full settings\n    representation (with the expectation that users of this format will\n    have access to the full representation by some other means)\n'
+        ),
+    ] = None
+    sources: List[MaterialsSource]

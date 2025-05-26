@@ -3,15 +3,16 @@
 
 from __future__ import annotations
 
-from typing import Literal, Optional
+from typing import Annotated, Literal, Optional
 
 from pydantic import BaseModel, Field
 
-from .. import definition_schema, wrapper_schema
+from ..definition_schema import TypeDefinition
+from ..wrapper_schema import TypeWrapper
 
 
-class EthdebugFormatTypeComplexAlias(BaseModel):
-    class_: Literal['complex'] = Field('complex', alias='class')
+class TypeComplexAlias(BaseModel):
+    class_: Annotated[Literal['complex'], Field(alias='class')] = 'complex'
     kind: Literal['alias']
-    contains: wrapper_schema.EthdebugFormatTypeWrapper
-    definition: Optional[definition_schema.EthdebugFormatTypeDefinition] = None
+    contains: TypeWrapper
+    definition: Optional[TypeDefinition] = None

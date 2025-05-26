@@ -3,70 +3,81 @@
 
 from __future__ import annotations
 
-from typing import Literal, Optional, Union
+from typing import Annotated, Literal, Optional, Union
 
 from pydantic import BaseModel, Field, RootModel
 
-from .. import definition_schema
+from ..definition_schema import TypeDefinition
 
 
-class EthdebugFormatTypeElementaryContract1(BaseModel):
-    class_: Literal['elementary'] = Field('elementary', alias='class')
+class Type_Elementary_Contract(BaseModel):
+    class_: Annotated[Literal['elementary'], Field(alias='class')] = 'elementary'
     kind: Literal['contract']
-    payable: Optional[bool] = Field(
-        None,
-        description='If this field is omitted, this type represents an address whose payability is not known.',
-    )
-    definition: Optional[definition_schema.EthdebugFormatTypeDefinition] = None
+    payable: Annotated[
+        Optional[bool],
+        Field(
+            description='If this field is omitted, this type represents an address whose payability is not known.'
+        ),
+    ] = None
+    definition: Optional[TypeDefinition] = None
     library: Literal[False] = False
     interface: Literal[False] = False
 
 
-class EthdebugFormatTypeElementaryContract2(BaseModel):
-    class_: Literal['elementary'] = Field('elementary', alias='class')
+class TypeElementaryContract2(BaseModel):
+    class_: Annotated[Literal['elementary'], Field(alias='class')] = 'elementary'
     kind: Literal['contract']
-    payable: Optional[bool] = Field(
-        None,
-        description='If this field is omitted, this type represents an address whose payability is not known.',
-    )
-    definition: Optional[definition_schema.EthdebugFormatTypeDefinition] = None
-    library: Literal[True] = Field(
-        ..., description='Indicates that this is a type representing a library'
-    )
+    payable: Annotated[
+        Optional[bool],
+        Field(
+            description='If this field is omitted, this type represents an address whose payability is not known.'
+        ),
+    ] = None
+    definition: Optional[TypeDefinition] = None
+    library: Annotated[
+        Literal[True],
+        Field(description='Indicates that this is a type representing a library'),
+    ]
 
 
-class EthdebugFormatTypeElementaryContract3(BaseModel):
-    class_: Literal['elementary'] = Field('elementary', alias='class')
+class TypeElementaryContract3(BaseModel):
+    class_: Annotated[Literal['elementary'], Field(alias='class')] = 'elementary'
     kind: Literal['contract']
-    payable: Optional[bool] = Field(
-        None,
-        description='If this field is omitted, this type represents an address whose payability is not known.',
-    )
-    definition: Optional[definition_schema.EthdebugFormatTypeDefinition] = None
-    interface: Literal[True] = Field(
-        ..., description='Indicates that this is a type representing an interface'
-    )
+    payable: Annotated[
+        Optional[bool],
+        Field(
+            description='If this field is omitted, this type represents an address whose payability is not known.'
+        ),
+    ] = None
+    definition: Optional[TypeDefinition] = None
+    interface: Annotated[
+        Literal[True],
+        Field(description='Indicates that this is a type representing an interface'),
+    ]
 
 
-class EthdebugFormatTypeElementaryContract(
+class TypeElementaryContract(
     RootModel[
         Union[
-            EthdebugFormatTypeElementaryContract1,
-            EthdebugFormatTypeElementaryContract2,
-            EthdebugFormatTypeElementaryContract3,
+            Type_Elementary_Contract, TypeElementaryContract2, TypeElementaryContract3
         ]
     ]
 ):
-    root: Union[
-        EthdebugFormatTypeElementaryContract1,
-        EthdebugFormatTypeElementaryContract2,
-        EthdebugFormatTypeElementaryContract3,
-    ] = Field(
-        ...,
-        description='Schema describing the representation of a contract type',
-        examples=[
-            {'kind': 'contract'},
-            {'kind': 'contract', 'library': False, 'interface': False, 'payable': True},
+    root: Annotated[
+        Union[
+            Type_Elementary_Contract, TypeElementaryContract2, TypeElementaryContract3
         ],
-        title='ethdebug/format/type/elementary/contract',
-    )
+        Field(
+            description='Schema describing the representation of a contract type',
+            examples=[
+                {'kind': 'contract'},
+                {
+                    'kind': 'contract',
+                    'library': False,
+                    'interface': False,
+                    'payable': True,
+                },
+            ],
+            title='ethdebug/format/type/elementary/contract',
+        ),
+    ]

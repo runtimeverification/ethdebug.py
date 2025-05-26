@@ -3,29 +3,40 @@
 
 from __future__ import annotations
 
+from typing import Annotated
+
 from pydantic import BaseModel, ConfigDict, Field
 
-from ... import pointer_schema
-from .. import expression_schema, identifier_schema
+from ...pointer_schema import Pointer
+from ..expression_schema import PointerExpression
+from ..identifier_schema import PointerIdentifier
 
 
 class List(BaseModel):
-    count: expression_schema.EthdebugFormatPointerExpression = Field(
-        ..., description='The size of the list that this collection represents.\n'
-    )
-    each: identifier_schema.EthdebugFormatPointerIdentifier = Field(
-        ...,
-        description='An identifier name whose value as an expression resolves to the index\nin the list\n',
-    )
-    is_: pointer_schema.EthdebugFormatPointer = Field(
-        ...,
-        alias='is',
-        description='The dynamically-generated pointer repeated as a list\n',
-    )
+    count: Annotated[
+        PointerExpression,
+        Field(description='The size of the list that this collection represents.\n'),
+    ]
+    each: Annotated[
+        PointerIdentifier,
+        Field(
+            description='An identifier name whose value as an expression resolves to the index\nin the list\n'
+        ),
+    ]
+    is_: Annotated[
+        Pointer,
+        Field(
+            alias='is',
+            description='The dynamically-generated pointer repeated as a list\n',
+        ),
+    ]
 
 
-class EthdebugFormatPointerCollectionList(BaseModel):
+class PointerCollectionList(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
     list: List
+
+
+List.model_rebuild()

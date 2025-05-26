@@ -3,21 +3,21 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Annotated, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from ... import pointer_schema
-from .. import expression_schema
+from ...pointer_schema import Pointer
+from ..expression_schema import PointerExpression
 
 
-class EthdebugFormatPointerCollectionConditional(BaseModel):
+class PointerCollectionConditional(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
-    if_: expression_schema.EthdebugFormatPointerExpression = Field(..., alias='if')
-    then: pointer_schema.EthdebugFormatPointer
-    else_: Optional[pointer_schema.EthdebugFormatPointer] = Field(None, alias='else')
+    if_: Annotated[PointerExpression, Field(alias='if')]
+    then: Pointer
+    else_: Annotated[Optional[Pointer], Field(alias='else')] = None
 
 
-EthdebugFormatPointerCollectionConditional.model_rebuild()
+PointerCollectionConditional.model_rebuild()

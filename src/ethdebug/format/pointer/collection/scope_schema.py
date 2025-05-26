@@ -3,20 +3,20 @@
 
 from __future__ import annotations
 
-from typing import Dict
+from typing import Annotated, Dict
 
-from pydantic import BaseModel, ConfigDict, Field, constr
+from pydantic import BaseModel, ConfigDict, Field
 
-from ... import pointer_schema
-from .. import expression_schema
+from ...pointer_schema import Pointer
+from ..expression_schema import PointerExpression
 
 
-class EthdebugFormatPointerCollectionScope(BaseModel):
+class PointerCollectionScope(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
     )
-    define: Dict[
-        constr(pattern=r'^[a-zA-Z_\-]+[a-zA-Z0-9$_\-]*$'),
-        expression_schema.EthdebugFormatPointerExpression,
-    ] = Field(..., title='Mapping of variables to expression value')
-    in_: pointer_schema.EthdebugFormatPointer = Field(..., alias='in')
+    define: Annotated[
+        Dict[str, PointerExpression],
+        Field(title='Mapping of variables to expression value'),
+    ]
+    in_: Annotated[Pointer, Field(alias='in')]

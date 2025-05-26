@@ -3,25 +3,20 @@
 
 from __future__ import annotations
 
-from typing import Union
+from typing import Annotated, Union
 
 from pydantic import Field, RootModel
 
-from . import hex_schema, unsigned_schema
+from .hex_schema import DataHex
+from .unsigned_schema import DataUnsigned
 
 
-class EthdebugFormatDataValue(
-    RootModel[
-        Union[
-            unsigned_schema.EthdebugFormatDataUnsigned, hex_schema.EthdebugFormatDataHex
-        ]
+class DataValue(RootModel[Union[DataUnsigned, DataHex]]):
+    root: Annotated[
+        Union[DataUnsigned, DataHex],
+        Field(
+            description='A non-negative integer value, expressed either as a native JSON number or as\na `0x`-prefixed hexadecimal string.\n',
+            examples=['0x0000', 2],
+            title='ethdebug/format/data/value',
+        ),
     ]
-):
-    root: Union[
-        unsigned_schema.EthdebugFormatDataUnsigned, hex_schema.EthdebugFormatDataHex
-    ] = Field(
-        ...,
-        description='A non-negative integer value, expressed either as a native JSON number or as\na `0x`-prefixed hexadecimal string.\n',
-        examples=['0x0000', 2],
-        title='ethdebug/format/data/value',
-    )

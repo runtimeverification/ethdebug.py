@@ -3,8 +3,41 @@
 
 from __future__ import annotations
 
-from pydantic import BaseModel
+from typing import Annotated, Union
+
+from pydantic import Field, RootModel
+
+from .collection.conditional_schema import PointerCollectionConditional
+from .collection.group_schema import PointerCollectionGroup
+from .collection.list_schema import PointerCollectionList
+from .collection.reference_schema import PointerCollectionReference
+from .collection.scope_schema import PointerCollectionScope
 
 
-class EthdebugFormatPointerCollection(BaseModel):
-    pass
+class PointerCollection(
+    RootModel[
+        Union[
+            PointerCollectionGroup,
+            PointerCollectionList,
+            PointerCollectionConditional,
+            PointerCollectionScope,
+            PointerCollectionReference,
+        ]
+    ]
+):
+    root: Annotated[
+        Union[
+            PointerCollectionGroup,
+            PointerCollectionList,
+            PointerCollectionConditional,
+            PointerCollectionScope,
+            PointerCollectionReference,
+        ],
+        Field(
+            description='A representation of a collection of pointers to data in the EVM\n',
+            title='ethdebug/format/pointer/collection',
+        ),
+    ]
+
+
+PointerCollection.model_rebuild()

@@ -3,16 +3,21 @@
 
 from __future__ import annotations
 
+from typing import Annotated
+
 from pydantic import BaseModel, Field
 
-from .. import expression_schema
+from ..expression_schema import PointerExpression
 
 
-class EthdebugFormatPointerSchemeSlice(BaseModel):
-    offset: expression_schema.EthdebugFormatPointerExpression = Field(
-        ...,
-        description='The index of the byte (starting from zero) in the data location where\nthe slice begins.\n',
-    )
-    length: expression_schema.EthdebugFormatPointerExpression = Field(
-        ..., description='The length of the slice in number of bytes.\n'
-    )
+class PointerSchemeSlice(BaseModel):
+    offset: Annotated[
+        PointerExpression,
+        Field(
+            description='The index of the byte (starting from zero) in the data location where\nthe slice begins.\n'
+        ),
+    ]
+    length: Annotated[
+        PointerExpression,
+        Field(description='The length of the slice in number of bytes.\n'),
+    ]

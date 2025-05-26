@@ -3,13 +3,18 @@
 
 from __future__ import annotations
 
-from pydantic import Field, RootModel, conint
+from typing import Annotated
+
+from pydantic import Field, RootModel
 
 
-class EthdebugFormatDataUnsigned(RootModel[conint(ge=0)]):
-    root: conint(ge=0) = Field(
-        ...,
-        description='A non-negative integer encoded as a JSON number.\n',
-        examples=[0, 100],
-        title='ethdebug/format/data/unsigned',
-    )
+class DataUnsigned(RootModel[int]):
+    root: Annotated[
+        int,
+        Field(
+            description='A non-negative integer encoded as a JSON number.\n',
+            examples=[0, 100],
+            ge=0,
+            title='ethdebug/format/data/unsigned',
+        ),
+    ]

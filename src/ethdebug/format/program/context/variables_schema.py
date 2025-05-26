@@ -3,35 +3,38 @@
 
 from __future__ import annotations
 
-from typing import List, Optional, Union
+from typing import Annotated, List, Optional, Union
 
-from pydantic import BaseModel, Field, constr
+from pydantic import BaseModel, Field
 
-from ... import pointer_schema, type_schema
-from ...materials import source_range_schema
-from ...type import reference_schema
+from ...materials.source_range_schema import MaterialsSourceRange
+from ...pointer_schema import Pointer
+from ...type.reference_schema import TypeReference
+from ...type_schema import Type
+
+
+class ProgramContextVariables(BaseModel):
+    variables: Annotated[List[Variable], Field(min_length=1)]
 
 
 class Variable(BaseModel):
-    identifier: Optional[constr(min_length=1)] = None
-    declaration: Optional[source_range_schema.EthdebugFormatMaterialsSourceRange] = (
+    identifier: Annotated[Optional[str], Field(min_length=1)] = None
+    declaration: Annotated[
+        Optional[MaterialsSourceRange],
         Field(
-            None,
-            description='Source range corresponding to where the variable was declared.\n',
-        )
-    )
-    type: Optional[
-        Union[
-            type_schema.EthdebugFormatType, reference_schema.EthdebugFormatTypeReference
-        ]
-    ] = Field(
-        None,
-        description='The variable\'s static type, if it exists. This **must** be specified\neither as a full **ethdebug/format/type** representation, or an\n`{ "id": "..." }` type reference object.\n',
-    )
-    pointer: Optional[pointer_schema.EthdebugFormatPointer] = Field(
-        None, description='Allocation information for the variable, if it exists.\n'
-    )
+            description='Source range corresponding to where the variable was declared.\n'
+        ),
+    ] = None
+    type: Annotated[
+        Optional[Union[Type, TypeReference]],
+        Field(
+            description='The variable\'s static type, if it exists. This **must** be specified\neither as a full **ethdebug/format/type** representation, or an\n`{ "id": "..." }` type reference object.\n'
+        ),
+    ] = None
+    pointer: Annotated[
+        Optional[Pointer],
+        Field(description='Allocation information for the variable, if it exists.\n'),
+    ] = None
 
 
-class EthdebugFormatProgramContextVariables(BaseModel):
-    variables: List[Variable] = Field(..., min_length=1)
+ProgramContextVariables.model_rebuild()

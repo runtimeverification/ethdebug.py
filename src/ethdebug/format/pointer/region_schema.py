@@ -3,21 +3,53 @@
 
 from __future__ import annotations
 
-from enum import Enum
-from typing import Optional
+from typing import Annotated, Union
 
-from pydantic import BaseModel
+from pydantic import Field, RootModel
 
-
-class Location(Enum):
-    stack = 'stack'
-    memory = 'memory'
-    storage = 'storage'
-    calldata = 'calldata'
-    returndata = 'returndata'
-    transient = 'transient'
-    code = 'code'
+from .region.calldata_schema import PointerRegionCalldata
+from .region.code_schema import PointerRegionCode
+from .region.memory_schema import PointerRegionMemory
+from .region.returndata_schema import PointerRegionReturndata
+from .region.stack_schema import PointerRegionStack
+from .region.storage_schema import PointerRegionStorage
+from .region.transient_schema import PointerRegionTransient
 
 
-class EthdebugFormatPointerRegion(BaseModel):
-    location: Optional[Location] = None
+class PointerRegion(
+    RootModel[
+        Union[
+            PointerRegionStack,
+            PointerRegionMemory,
+            PointerRegionStorage,
+            PointerRegionCalldata,
+            PointerRegionReturndata,
+            PointerRegionTransient,
+            PointerRegionCode,
+        ]
+    ]
+):
+    root: Annotated[
+        Union[
+            PointerRegionStack,
+            PointerRegionMemory,
+            PointerRegionStorage,
+            PointerRegionCalldata,
+            PointerRegionReturndata,
+            PointerRegionTransient,
+            PointerRegionCode,
+        ],
+        Field(
+            description='A representation of a region of data in the EVM\n',
+            examples=[
+                {
+                    'location': 'storage',
+                    'slot': '0x0000000000000000000000000000000000000000000000000000000000000000',
+                }
+            ],
+            title='ethdebug/format/pointer/region',
+        ),
+    ]
+
+
+PointerRegion.model_rebuild()
