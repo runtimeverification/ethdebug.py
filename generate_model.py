@@ -14,7 +14,7 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 # Temporarily rename LICENSE file so it doesn't cause parsing issues
 license_path = SCHEMA_DIR / "LICENSE"
 
-with NamedTemporaryFile() as tmp_file:
+with NamedTemporaryFile(delete=False) as tmp_file:
     if license_path.exists():
         license_path.rename(tmp_file.name)
         temp_license_path = Path(tmp_file.name)
@@ -35,5 +35,5 @@ with NamedTemporaryFile() as tmp_file:
         )
     finally:
         # Restore LICENSE file
-        if license_path.exists():
+        if temp_license_path.exists():
             temp_license_path.rename(license_path)
