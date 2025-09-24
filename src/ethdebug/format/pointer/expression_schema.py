@@ -74,7 +74,7 @@ class Read(BaseModel):
 
 class PointerExpression(
     RootModel[
-        Union[Literal, Variable, Constant, 'Arithmetic', Lookup, Read, 'Keccak256', 'Resize']
+        Union[Literal, Variable, Constant, Arithmetic, Lookup, Read, Keccak256, Resize]
     ]
 ):
     root: Annotated[
