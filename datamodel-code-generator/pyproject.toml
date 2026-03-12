@@ -95,9 +95,9 @@ docs = [
   "mkdocs>=1.6",
   "mkdocs-material>=9.5.31",
 ]
-black22 = [ "black==22.1" ]
-black23 = [ "black==23.12" ]
-black24 = [ "black==24.1" ]
+black22 = [ "black==25.11.0" ]
+black23 = [ "black==25.11.0" ]
+black24 = [ "black==25.11.0" ]
 fix = [ "pre-commit-uv>=4.1.4" ]
 pkg-meta = [ "check-wheel-contents>=0.6.1", "twine>=6.1", "uv>=0.5.22" ]
 coverage = [
