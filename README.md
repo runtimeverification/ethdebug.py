@@ -1,4 +1,11 @@
-# EthDebug.py
+<div align="center">
+
+# 🐞 EthDebug.py
+
+[![Discord](https://img.shields.io/badge/discord-join-7289da)](https://discord.gg/CurfmXNtbN)
+[![License](https://img.shields.io/badge/license-BSD--3-orange)](LICENSE)
+
+</div>
 
 EthDebug.py is a library offering debugging primitives that are commonly used by developer tools, such as breakpoint-style debuggers, testing frameworks, or static analyzers/linters. Notably, it includes a complete debugger-side implementation of the EthDebug format. The main function is reading Solidity runtime information (like local variables) from a running Ethereum Virtual Machine.
 
@@ -6,6 +13,7 @@ Things you can do with EthDebug.py:
 - Read the value of a Solidity variable at a paused machine state
 - See which variables are in scope at a specific source location
 - Provide better log and error messages by replacing unreadable EVM details with their human-readable Solidity counterparts
+- Work in progress: Add ethdebug data to existing compilation units.
 
 This library is agnostic of any specific virtual machine implementation and compiler. The following diagram shows the relationship between the different components:
 
