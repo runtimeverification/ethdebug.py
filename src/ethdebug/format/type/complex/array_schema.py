@@ -3,14 +3,26 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Literal
+from typing import Annotated, Literal, Optional
 
 from pydantic import BaseModel, Field
 
+from ...data.value_schema import DataValue
 from ..wrapper_schema import TypeWrapper
 
 
 class TypeComplexArray(BaseModel):
     class_: Annotated[Literal['complex'], Field(alias='class')] = 'complex'
     kind: Literal['array']
-    contains: TypeWrapper
+    contains: Annotated[
+        TypeWrapper,
+        Field(
+            description='The element type contained by this array, specified as an\n**ethdebug/format/type/wrapper**.\n'
+        ),
+    ]
+    count: Annotated[
+        Optional[DataValue],
+        Field(
+            description='The fixed number of elements in this array. When omitted, the array\nis dynamically sized.\n'
+        ),
+    ] = None

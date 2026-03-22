@@ -12,6 +12,7 @@ from .collection.group_schema import PointerCollectionGroup
 from .collection.list_schema import PointerCollectionList
 from .collection.reference_schema import PointerCollectionReference
 from .collection.scope_schema import PointerCollectionScope
+from .collection.templates_schema import PointerCollectionTemplates
 
 
 class PointerCollection(
@@ -22,6 +23,7 @@ class PointerCollection(
             PointerCollectionConditional,
             PointerCollectionScope,
             PointerCollectionReference,
+            PointerCollectionTemplates,
         ]
     ]
 ):
@@ -32,6 +34,7 @@ class PointerCollection(
             PointerCollectionConditional,
             PointerCollectionScope,
             PointerCollectionReference,
+            PointerCollectionTemplates,
         ],
         Field(
             description='A representation of a collection of pointers to data in the EVM\n',

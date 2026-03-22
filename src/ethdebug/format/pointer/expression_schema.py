@@ -74,11 +74,31 @@ class Read(BaseModel):
 
 class PointerExpression(
     RootModel[
-        Union[Literal, Variable, Constant, 'Arithmetic', Lookup, Read, 'Keccak256', 'Resize']
+        Union[
+            Literal,
+            Variable,
+            Constant,
+            'Arithmetic',
+            Lookup,
+            Read,
+            'Keccak256',
+            'Concat',
+            'Resize',
+        ]
     ]
 ):
     root: Annotated[
-        Union[Literal, Variable, Constant, Arithmetic, Lookup, Read, Keccak256, Resize],
+        Union[
+            Literal,
+            Variable,
+            Constant,
+            Arithmetic,
+            Lookup,
+            Read,
+            Keccak256,
+            Concat,
+            Resize,
+        ],
         Field(
             description='A schema for describing expressions that evaluate to values.\n',
             examples=[
@@ -141,6 +161,16 @@ class Keccak256(BaseModel):
     field_keccak256: Annotated[
         List[PointerExpression],
         Field(alias='$keccak256', title='Array of hashed values'),
+    ]
+
+
+class Concat(BaseModel):
+    model_config = ConfigDict(
+        extra='forbid',
+    )
+    field_concat: Annotated[
+        List[PointerExpression],
+        Field(alias='$concat', title='Array of values to concatenate'),
     ]
 
 

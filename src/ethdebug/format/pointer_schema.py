@@ -60,43 +60,59 @@ class Pointer(RootModel[Union[PointerRegion, PointerCollection]]):
                     },
                 },
                 {
-                    'define': {'struct-storage-contract-variable-slot': 0},
+                    'templates': {
+                        'packed-field': {
+                            'expect': [
+                                'struct-storage-contract-variable-slot',
+                                'previous',
+                                'size',
+                            ],
+                            'for': {
+                                'name': 'field',
+                                'location': 'storage',
+                                'slot': 'struct-storage-contract-variable-slot',
+                                'offset': {'$difference': ['previous', 'size']},
+                                'length': 'size',
+                            },
+                        }
+                    },
                     'in': {
-                        'group': [
-                            {
-                                'name': 'x',
-                                'location': 'storage',
-                                'slot': 'struct-storage-contract-variable-slot',
-                                'offset': {
-                                    '$difference': ['$wordsize', {'.length': '$this'}]
+                        'define': {'struct-storage-contract-variable-slot': 0},
+                        'in': {
+                            'group': [
+                                {
+                                    'name': 'packing-begin',
+                                    'location': 'storage',
+                                    'slot': 'struct-storage-contract-variable-slot',
+                                    'offset': '$wordsize',
+                                    'length': 0,
                                 },
-                                'length': 1,
-                            },
-                            {
-                                'name': 'y',
-                                'location': 'storage',
-                                'slot': 'struct-storage-contract-variable-slot',
-                                'offset': {
-                                    '$difference': [
-                                        {'.offset': 'x'},
-                                        {'.length': '$this'},
-                                    ]
+                                {
+                                    'define': {
+                                        'previous': {'.offset': 'packing-begin'},
+                                        'size': 1,
+                                    },
+                                    'in': {
+                                        'template': 'packed-field',
+                                        'yields': {'field': 'x'},
+                                    },
                                 },
-                                'length': 1,
-                            },
-                            {
-                                'name': 'salt',
-                                'location': 'storage',
-                                'slot': 'struct-storage-contract-variable-slot',
-                                'offset': {
-                                    '$difference': [
-                                        {'.offset': 'y'},
-                                        {'.length': '$this'},
-                                    ]
+                                {
+                                    'define': {'previous': {'.offset': 'x'}, 'size': 1},
+                                    'in': {
+                                        'template': 'packed-field',
+                                        'yields': {'field': 'y'},
+                                    },
                                 },
-                                'length': 4,
-                            },
-                        ]
+                                {
+                                    'define': {'previous': {'.offset': 'y'}, 'size': 4},
+                                    'in': {
+                                        'template': 'packed-field',
+                                        'yields': {'field': 'salt'},
+                                    },
+                                },
+                            ]
+                        },
                     },
                 },
                 {

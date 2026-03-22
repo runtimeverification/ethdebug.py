@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Annotated, Dict, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -15,3 +15,10 @@ class PointerCollectionReference(BaseModel):
         extra='forbid',
     )
     template: Annotated[PointerIdentifier, Field(title='Template identifier')]
+    yields: Annotated[
+        Optional[Dict[str, PointerIdentifier]],
+        Field(
+            description='Maps region names produced by the template to new names for use\noutside the template. Unmapped region names pass through unchanged.\nWhen omitted, all regions keep their original names.\n',
+            title='Region name mapping',
+        ),
+    ] = None

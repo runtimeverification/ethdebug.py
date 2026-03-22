@@ -3,7 +3,8 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Union
+from enum import Enum
+from typing import Annotated, Optional, Union
 
 from pydantic import Field, RootModel
 
@@ -16,28 +17,38 @@ from .region.storage_schema import PointerRegionStorage
 from .region.transient_schema import PointerRegionTransient
 
 
+class Location(Enum):
+    stack = 'stack'
+    memory = 'memory'
+    storage = 'storage'
+    calldata = 'calldata'
+    returndata = 'returndata'
+    transient = 'transient'
+    code = 'code'
+
+
 class PointerRegion(
     RootModel[
         Union[
-            PointerRegionStack,
-            PointerRegionMemory,
-            PointerRegionStorage,
-            PointerRegionCalldata,
-            PointerRegionReturndata,
-            PointerRegionTransient,
-            PointerRegionCode,
+            Pointer_Region,
+            PointerRegion2,
+            PointerRegion3,
+            PointerRegion4,
+            PointerRegion5,
+            PointerRegion6,
+            PointerRegion7,
         ]
     ]
 ):
     root: Annotated[
         Union[
-            PointerRegionStack,
-            PointerRegionMemory,
-            PointerRegionStorage,
-            PointerRegionCalldata,
-            PointerRegionReturndata,
-            PointerRegionTransient,
-            PointerRegionCode,
+            Pointer_Region,
+            PointerRegion2,
+            PointerRegion3,
+            PointerRegion4,
+            PointerRegion5,
+            PointerRegion6,
+            PointerRegion7,
         ],
         Field(
             description='A representation of a region of data in the EVM\n',
@@ -50,6 +61,34 @@ class PointerRegion(
             title='ethdebug/format/pointer/region',
         ),
     ]
+
+
+class Pointer_Region(PointerRegionStack):
+    location: Optional[Location] = None
+
+
+class PointerRegion3(PointerRegionStorage):
+    location: Optional[Location] = None
+
+
+class PointerRegion6(PointerRegionTransient):
+    location: Optional[Location] = None
+
+
+class PointerRegion4(PointerRegionCalldata):
+    location: Optional[Location] = None
+
+
+class PointerRegion7(PointerRegionCode):
+    location: Optional[Location] = None
+
+
+class PointerRegion2(PointerRegionMemory):
+    location: Optional[Location] = None
+
+
+class PointerRegion5(PointerRegionReturndata):
+    location: Optional[Location] = None
 
 
 PointerRegion.model_rebuild()
