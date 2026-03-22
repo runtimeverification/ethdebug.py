@@ -17,7 +17,12 @@ dev = [
     "datamodel-code-generator",
     "pytest>=8.3.5",
     "pytest-asyncio>=0.26.0",
+    "requests>=2.32.5",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["src/tests"]
+pythonpath = ["src"]
 
 [tool.uv]
 
